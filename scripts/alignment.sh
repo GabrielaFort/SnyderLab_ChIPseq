@@ -182,17 +182,17 @@ do
     
 
   ###Removing adapters from reads and quality trim
-  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.g -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz 2> ${filename}.cutadapt.summary.out
+  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
  
   rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
 
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam 2> ${filename}.alignment.summary.out
+  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
   ###Using Tim's UMIscripts to discard duplicates using UMIs
-  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 2> ${filename}.UMI.summary.out
+  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12
 
   samtools index ${base}.sorted.dedup.bam
 
