@@ -181,6 +181,7 @@ do
   merge_umi_fastq.pl $read_1 $read_2 $UMI
   UMIfastq_1=$(basename $read_1 .fastq.gz)
   UMIfastq_2=$(basename $read_2 .fastq.gz)
+  base=$(basename $read_1 _R1.fastq.gz)
   rm $read_1 $read_2
     
 
@@ -195,7 +196,7 @@ do
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
   echo "------------------Aligning reads and running samtools for $filename--------------------------"
   /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x ${input_genome} -1 ${UMIfastq_1}.filenameuumi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
