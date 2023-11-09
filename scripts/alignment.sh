@@ -175,7 +175,7 @@ do
 
   echo "---------------Input samples look good for $filename-----------------"
   echo
-  echo "-------Appending SAM tags to fastq files with UMIs for sample $filename--------"
+  echo "--------Appending SAM tags to fastq files with UMIs for sample $filename--------"
 
   # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
   merge_umi_fastq.pl $read_1 $read_2 $UMI
