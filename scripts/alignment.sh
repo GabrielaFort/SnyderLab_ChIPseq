@@ -97,7 +97,7 @@ then
   input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_mm10_index/mm10.standard.bowtie2'
 elif [ $genome == mm39 ]
 then
-  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_mm39_index/mm39.standard.bowtie2'
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_mm39_index/GRCm39'
 fi
 
 
