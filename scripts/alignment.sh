@@ -117,8 +117,6 @@ cd $directory
 for x in *gz; do mv $x ${x/_*R/_R}; done
 for x in *gz; do mv $x ${x/_001/}; done
 
-# Iterate through all input files and use grep to pull out each unique name 
-# Use regex to find R1 (read 1), R2 (UMI), and R3 (read 2) and run alignment script
 
 # Initiate empty array
 declare -a file_names=()
@@ -141,7 +139,7 @@ done
 
 
 # Iterate through unique array, find file matches, assign to R1, UMI, R3 variables, and run alignment steps on each set
-for filename in ${!uniq_names[@]}
+for filename in "${!uniq_names[@]}"
 do
   for file in *gz
   do 
@@ -157,38 +155,52 @@ do
       elif [[ $file == *R3* ]]
       then 
         read_2=$file
-      fi
-    
-    # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
-    merge_umi_fastq.pl $read_1 $read_2 $UMI
-    UMIfastq_1=$(basename $read_1 .fastq.gz)
-    UMIfastq_2=$(basename $read_2 .fastq.gz)
-    rm $read_1 $read_2
-    
-
-    ###Removing adapters from reads and quality trim
-    cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
-    -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz \ 
-    -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz > ${filename}.cutadapt.summary.out
- 
-    rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
-
-    ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-    /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-    -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam \
-    > ${filename}.alignment.summary.out
-
-    samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
-
-    ###Using Tim's UMIscripts to discard duplicates using UMIs
-    bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 > ${filename}.UMI.summary.out
-
-    samtools index ${base}.sorted.dedup.bam
-
-    rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMIfastq} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz
-
- 
+      fi  
     fi
   done
+  
+  # Make sure all files are present for each sample - if not print error message and quit
+  if [ ! -v read_1 ]
+  then
+    echo "An R1 file is missing for at least one sample"
+    exit 1
+  elif [ ! -v read_2 ]
+  then
+    echo "An R2 file is missing for at least one sample"
+    exit 1
+  elif [ ! -v UMI ]
+  then
+    echo "A UMI file is missing for at least one sample"
+    exit 1
+  fi
+
+  # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
+  merge_umi_fastq.pl $read_1 $read_2 $UMI
+  UMIfastq_1=$(basename $read_1 .fastq.gz)
+  UMIfastq_2=$(basename $read_2 .fastq.gz)
+  rm $read_1 $read_2
+    
+
+  ###Removing adapters from reads and quality trim
+  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz \ 
+  -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz > ${filename}.cutadapt.summary.out
+ 
+  rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
+
+  ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
+  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
+  -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam \
+  > ${filename}.alignment.summary.out
+
+  samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
+
+  ###Using Tim's UMIscripts to discard duplicates using UMIs
+  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 > ${filename}.UMI.summary.out
+
+  samtools index ${base}.sorted.dedup.bam
+
+  rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMIfastq} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz
+
 done
 
