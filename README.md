@@ -6,8 +6,8 @@ A set of scripts and tools for analysis of ChIP-sequencing datasets. Includes us
 of fastq files, peak calling, peak annotation, merging replicates, and identification of differential peaks 
 between samples.
 
-## Step 1: Alignment ```alignment.sh```
-
+## Step 1: Alignment 
+### ```alignment.sh```
 ```
 Usage: alignment.sh [{-d|--directory} path to input directory] [{-g|--genome} genome]
 
