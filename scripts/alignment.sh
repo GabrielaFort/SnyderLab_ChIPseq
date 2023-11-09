@@ -1,25 +1,23 @@
 #!/bin/bash
-#SBATCH -t 24:00:00 -N 1 -n 16
+#SBATCH -t 12:00:00 -N 1 -n 16
 #SBATCH --account=snydere
 #SBATCH --partition=kingspeak
 
 
-# Loading in required CHPC-installed modules
+###### Loading in required modules ######
 
-###Using Tim's UMIscripts to add SAM tags to fastq files with UMIs
+# Using Tim Parnell's UMIscripts and some other CHPC-installed modules
 module use /uufs/chpc.utah.edu/common/home/hcibcore/Modules/modulefiles
 module load umiscripts
-
 module load cutadapt
-module load bowtie2
 module load samtools
 
 
-# Parsing command line arguments
+###### Parsing command line arguments ######
 blnk=$(echo "$arg0" | sed 's/./ /g')
 arg0=$(basename "$0")
 
-# Writing usage function 
+# Usage function to describe/document script
 usage_info()
 {
     echo "Usage: $arg0 [{-d|--directory} path to input directory] [{-g|--genome} genome]"
@@ -29,7 +27,7 @@ usage_info()
 }
 
 
-# Write error function that will happen when there is no argument entered
+# Error function that will be called when there is no argument entered
 error()
 {
     echo "$arg0: $*" >&2
@@ -38,13 +36,12 @@ error()
 
 
 
-
-# Write help function/documentation 
+# Help function/message 
 help_fun()
 {
     usage_info
     echo
-    echo "\n{-d|--directory} directory      -- Set path to directory with fastq files"
+    echo "{-d|--directory} directory      -- Set path to directory with fastq files"
     echo "{-g|--genome} genome            -- Set genome to align to (mm10, mm39, hg19, hg38)"
     echo "{-h|--help}                     -- Prints this help message and exits"
     exit 0
@@ -76,8 +73,9 @@ flags()
     done
 }
 
-# This runs flags function on input arguments
+# Run flags function on input arguments
 flags "$@"
+
 
 # Make sure user inputs correct genome option
 if [[ ! $genome =~ ^(mm10|mm39|hg19|hg38)$ ]] #use regular expressions to find either pattern
@@ -87,12 +85,110 @@ then
 fi
 
 
+# Assign bowtie2 index paths to variables depending on input genome build...
+if [ $genome == hg38 ]
+then 
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_hg38_index/hg38.standard.fa'
+elif [ $genome == hg19 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_hg19_index/hg19'
+elif [ $genome == mm10 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_mm10_index/mm10.standard.bowtie2'
+elif [ $genome == mm39 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie_mm39_index/mm39.standard.bowtie2'
+fi
 
 
+# Make sure input directory exists
+if [ ! -d $directory ]
+then
+  echo "Cannot find input directory."
+  exit 1
+fi 
 
 
+# Navigate into input directory
+cd $directory
 
 
+# Rename files in the directory from their long gnomex names to shorter names 
+for x in *gz; do mv $x ${x/_*R/_R}; done
+for x in *gz; do mv $x ${x/_001/}; done
+
+# Iterate through all input files and use grep to pull out each unique name 
+# Use regex to find R1 (read 1), R2 (UMI), and R3 (read 2) and run alignment script
+
+# Initiate empty array
+declare -a file_names=()
+
+# Add only sample names to empty array
+for file in *gz 
+do
+  file_name=$(echo $file | awk -F_ '{ print $1 }')
+  file_names+=($file_name)
+done
 
 
+# Now going to get a unique array using a dictionary
+declare -A uniq_names
+
+for filename in "${file_names[@]}"
+do
+  uniq_names[$filename]=0 # assigning a placeholder
+done
+
+
+# Iterate through unique array, find file matches, assign to R1, UMI, R3 variables, and run alignment steps on each set
+for filename in ${!uniq_names[@]}
+do
+  for file in *gz
+  do 
+    new_file_name=$(echo $file | awk -F_ '{ print $1 }')
+    if test $new_file_name == $filename
+    then
+      if [[ $file == *R1* ]]
+      then 
+        read_1=$file
+      elif [[ $file == *R2* ]]
+      then 
+        UMI=$file
+      elif [[ $file == *R3* ]]
+      then 
+        read_2=$file
+      fi
+    
+    # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
+    merge_umi_fastq.pl $read_1 $read_2 $UMI
+    UMIfastq_1=$(basename $read_1 .fastq.gz)
+    UMIfastq_2=$(basename $read_2 .fastq.gz)
+    rm $read_1 $read_2
+    
+
+    ###Removing adapters from reads and quality trim
+    cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+    -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz \ 
+    -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz > ${filename}.cutadapt.summary.out
+ 
+    rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
+
+    ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
+    /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
+    -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam \
+    > ${filename}.alignment.summary.out
+
+    samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
+
+    ###Using Tim's UMIscripts to discard duplicates using UMIs
+    bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 > ${filename}.UMI.summary.out
+
+    samtools index ${base}.sorted.dedup.bam
+
+    rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMIfastq} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz
+
+ 
+    fi
+  done
+done
 
