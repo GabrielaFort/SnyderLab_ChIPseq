@@ -144,7 +144,7 @@ do
   for file in *gz
   do 
     new_file_name=$(echo $file | awk -F_ '{ print $1 }')
-    if test $new_file_name == $filename
+    if [ "$new_file_name" == "$filename" ]
     then
       if [[ $file == *R1* ]]
       then 
@@ -182,16 +182,12 @@ do
     
 
   ###Removing adapters from reads and quality trim
-  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
-  -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz \ 
-  -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz > ${filename}.cutadapt.summary.out
+  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.g -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz > ${filename}.cutadapt.summary.out
  
   rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
 
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam \
-  > ${filename}.alignment.summary.out
+  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam > ${filename}.alignment.summary.out
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
