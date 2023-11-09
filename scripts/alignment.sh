@@ -10,7 +10,6 @@
 module use /uufs/chpc.utah.edu/common/home/hcibcore/Modules/modulefiles
 module load umiscripts
 module load cutadapt
-module load samtools
 
 
 ###### Parsing command line arguments ######
@@ -182,12 +181,15 @@ do
     
 
   ###Removing adapters from reads and quality trim
-  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz -q 20 -m 50 -j 16 ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
+  cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz -q 20 -m 50 -j 16 \
+  ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
  
   rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
 
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 -x $input_genome -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
+  /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
