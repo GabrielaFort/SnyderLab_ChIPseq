@@ -3,8 +3,8 @@
 
 ## Description
 A set of scripts and tools for analysis of ChIP-sequencing datasets. Includes useful scripts for alignment
-of fastq files, peak calling, peak annotation, merging replicates, and identification of differential peaks 
-between samples.
+of fastq files, peak calling, motif finding, peak annotation, merging replicates, identification of differential 
+peaks between samples, and intersecting ChIP-seq and RNA-seq datasets.
 
 ## Step 1: Alignment 
 ### ```alignment.sh```
