@@ -204,7 +204,7 @@ do
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
   echo -e "------------------Aligning reads and running samtools for $filename--------------------------\n"
   /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz &>> summary.out \
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz 2>> summary.out \
   | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
