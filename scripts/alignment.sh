@@ -1,8 +1,13 @@
 #!/bin/bash
-#SBATCH -t 12:00:00 -N 1 -n 16
+#SBATCH -t 24:00:00 -N 1 -n 16
 #SBATCH --account=snydere
 #SBATCH --partition=kingspeak
 
+echo "----------------------" > summary.out
+echo "Running alignment.sh" >> summary.out
+echo -e "----------------------\n" >> summary.out
+start_time='date'
+echo "Run started at ${start_time}" >> summary.out
 
 ###### Loading in required modules ######
 
@@ -173,12 +178,14 @@ do
     exit 1
   fi
 
-  echo "---------------Input samples look good for $filename-----------------"
-  echo
-  echo "--------Appending SAM tags to fastq files with UMIs for sample $filename--------"
+  echo -e "\n\n----------------------------------------" >> summary.out
+  echo "Starting alignment for $filename" >> summary.out
+  echo -e "----------------------------------------\n\n" >> summary.out
+  echo -e "--------Appending SAM tags to fastq files with UMIs for sample $filename--------\n" >> summary.out
+  
 
   # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
-  merge_umi_fastq.pl $read_1 $read_2 $UMI
+  merge_umi_fastq.pl $read_1 $read_2 $UMI >> summary.out
   UMIfastq_1=$(basename $read_1 .fastq.gz)
   UMIfastq_2=$(basename $read_2 .fastq.gz)
   base=$(basename $read_1 _R1.fastq.gz)
@@ -186,28 +193,33 @@ do
     
 
   ###Removing adapters from reads and quality trim
-  echo "----------------Running cutadapt on $filename to remove adaptors and quality trim reads--------------------"
+  echo -e "--------Running cutadapt on $filename to remove adaptors and quality trim reads--------\n" >> summary.out
   cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
   -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz -q 20 -m 50 -j 16 \
-  ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
+  ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz 
  
   rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
 
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-  echo "------------------Aligning reads and running samtools for $filename--------------------------"
+  echo -e "------------------Aligning reads and running samtools for $filename--------------------------\n"
   /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - ${base}.bam
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - \
+  ${base}.bam >> summary.out
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
+
   ###Using Tim's UMIscripts to discard duplicates using UMIs
-  echo "-------------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------"
-  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12
+  echo -e "\n------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------\n" >> summary.out
+  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 >> summary.out
 
   samtools index ${base}.sorted.dedup.bam
-
-  rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMIfastq} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz
   
-  echo "-------------------Done with alignment for sample $filename-------------------------"
+
+  rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMI} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz 
+  
+  end_time='date'
+  echo -e "\n------------------Alignment for sample $filename finished at $end_time-------------------------\n" >> summary.out
+
 done
 
