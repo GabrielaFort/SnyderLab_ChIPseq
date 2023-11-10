@@ -186,7 +186,7 @@ do
   
 
   # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
-  merge_umi_fastq.pl $read_1 $read_2 $UMI >> summary.out
+  merge_umi_fastq.pl $read_1 $read_2 $UMI &>> summary.out
   UMIfastq_1=$(basename $read_1 .fastq.gz)
   UMIfastq_2=$(basename $read_2 .fastq.gz)
   base=$(basename $read_1 _R1.fastq.gz)
@@ -204,15 +204,15 @@ do
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
   echo -e "------------------Aligning reads and running samtools for $filename--------------------------\n"
   /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz | samtools fixmate -m - \
-  ${base}.bam >> summary.out
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz &>> summary.out \
+  | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
 
   ###Using Tim's UMIscripts to discard duplicates using UMIs
   echo -e "\n------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------\n" >> summary.out
-  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 >> summary.out
+  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 &>> summary.out
 
   samtools index ${base}.sorted.dedup.bam
   
