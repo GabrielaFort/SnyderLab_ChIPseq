@@ -13,7 +13,6 @@ module load cutadapt
 
 
 ###### Parsing command line arguments ######
-blnk=$(echo "$arg0" | sed 's/./ /g')
 arg0=$(basename "$0")
 
 # Usage function to describe/document script
