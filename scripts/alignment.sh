@@ -3,11 +3,6 @@
 #SBATCH --account=snydere
 #SBATCH --partition=kingspeak
 
-echo "----------------------" > summary.out
-echo "Running alignment.sh" >> summary.out
-echo -e "----------------------\n" >> summary.out
-start_time='date'
-echo "Run started at ${start_time}" >> summary.out
 
 ###### Loading in required modules ######
 
@@ -116,6 +111,13 @@ fi
 # Navigate into input directory
 cd $directory
 
+echo "----------------------" > summary.out
+echo "Running alignment.sh" >> summary.out
+echo -e "----------------------\n" >> summary.out
+echo "Run started at:" >> summary.out
+date >> summary.out
+
+
 
 # Rename files in the directory from their long gnomex names to shorter names 
 for x in *gz; do mv $x ${x/_*R/_R}; done
@@ -218,8 +220,9 @@ do
 
   rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMI} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz 
   
-  end_time='date'
-  echo -e "\n------------------Alignment for sample $filename finished at $end_time-------------------------\n" >> summary.out
+  echo -e "\nAlignment for sample $filename finished at:" >> summary.out
+  date >> summary.out
+  echo >> summary.out
 
 done
 
