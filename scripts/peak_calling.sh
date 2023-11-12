@@ -164,7 +164,7 @@ fi
 
 echo -e "Starting Macs2 peak calling...\n" >> peakcalling_summary.out
 # Using macs2 (CHPC-installed) to call peaks
-macs2 callpeak -t $chip -c $control --bdg -f BAMPE -g $gsize --SPMR -q $qvalue --keep-dup all -n $name
+macs2 callpeak -t ../${chip} -c ../${control} --bdg -f BAMPE -g $gsize --SPMR -q $qvalue --keep-dup all -n $name
 
 echo -e "Converting bdg files to bw files...\n" >> peakcalling_summary.out
 # Creating bw file from bdg file for control and exp samples
