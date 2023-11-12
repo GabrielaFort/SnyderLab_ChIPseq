@@ -7,7 +7,7 @@
 module load macs/2.2.7
 
 # must have homer installed and in path
-
+# this script also uses bedGraphtoBigWig
 
 ###### Parsing command line arguments ######
 arg0=$(basename "$0")
