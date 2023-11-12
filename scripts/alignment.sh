@@ -110,12 +110,10 @@ fi
 # Navigate into input directory
 cd $directory
 
-echo "----------------------" > summary.out
-echo "Running alignment.sh" >> summary.out
-echo -e "----------------------\n" >> summary.out
-echo "Run started at:" >> summary.out
-date >> summary.out
-
+echo "----------------------" > alignment_summary.out
+echo "Running alignment.sh" >> alignment_summary.out
+echo -e "----------------------\n" >> alignment_summary.out
+echo "Run started at: `date`" >> alignment_summary.out
 
 
 # Rename files in the directory from their long gnomex names to shorter names 
@@ -179,14 +177,14 @@ do
     exit 1
   fi
 
-  echo -e "\n\n----------------------------------------" >> summary.out
-  echo "Starting alignment for $filename" >> summary.out
-  echo -e "----------------------------------------\n\n" >> summary.out
-  echo -e "--------Appending SAM tags to fastq files with UMIs for sample $filename--------\n" >> summary.out
+  echo -e "\n\n----------------------------------------" >> alignment_summary.out
+  echo "Starting alignment for $filename" >> alignment_summary.out
+  echo -e "----------------------------------------\n\n" >> alignment_summary.out
+  echo -e "--------Appending SAM tags to fastq files with UMIs for sample $filename--------\n" >> alignment_summary.out
   
 
   # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
-  merge_umi_fastq.pl $read_1 $read_2 $UMI &>> summary.out
+  merge_umi_fastq.pl $read_1 $read_2 $UMI &>> alignment_summary.out
   UMIfastq_1=$(basename $read_1 .fastq.gz)
   UMIfastq_2=$(basename $read_2 .fastq.gz)
   base=$(basename $read_1 _R1.fastq.gz)
@@ -194,7 +192,7 @@ do
     
 
   ###Removing adapters from reads and quality trim
-  echo -e "--------Running cutadapt on $filename to remove adaptors and quality trim reads--------\n" >> summary.out
+  echo -e "\n--------Running cutadapt on $filename to remove adaptors and quality trim reads--------\n" >> alignment_summary.out
   cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
   -o ${UMIfastq_1}.umi.cut.fastq.gz -p ${UMIfastq_2}.umi.cut.fastq.gz -q 20 -m 50 -j 16 \
   ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz 
@@ -202,26 +200,25 @@ do
   rm ${UMIfastq_1}.umi.fastq.gz ${UMIfastq_2}.umi.fastq.gz
 
   ###Align reads using Bowtie2 (use our installed version as we need at least 2.4 and chpc's version is older
-  echo -e "------------------Aligning reads and running samtools for $filename--------------------------\n"
+  echo -e "\n------------------Aligning reads and running samtools for $filename--------------------------\n" >> alignment_summary.out
   /uufs/chpc.utah.edu/common/home/snydere-group1/bin/bowtie2-2.4.4-linux-x86_64/bowtie2 --sam-append-comment -p 16 \
-  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz 2>> summary.out \
+  -x ${input_genome} -1 ${UMIfastq_1}.umi.cut.fastq.gz -2 ${UMIfastq_2}.umi.cut.fastq.gz 2>> alignment_summary.out \
   | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
 
 
   ###Using Tim's UMIscripts to discard duplicates using UMIs
-  echo -e "\n------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------\n" >> summary.out
-  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 &>> summary.out
+  echo -e "\n------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------\n" >> alignment_summary.out
+  bam_umi_dedup.pl --in ${base}.sorted.bam --distance 2500 --out ${base}.sorted.dedup.bam --cpu 12 &>> alignment_summary.out
 
   samtools index ${base}.sorted.dedup.bam
   
 
   rm ${base}.bam ${base}.sorted.bam ${base}.sorted.bam.bai ${UMI} ${UMIfastq_1}.umi.cut.fastq.gz ${UMIfastq_2}.umi.cut.fastq.gz 
   
-  echo -e "\nAlignment for sample $filename finished at:" >> summary.out
-  date >> summary.out
-  echo >> summary.out
-
+  echo "----------------------------------------------------" >> alignment_summary.out
+  echo -e "\nAlignment for sample $filename finished at:\n`date`" >> alignment_summary.out
+  echo "----------------------------------------------------" >> alignment_summary.out
 done
 
