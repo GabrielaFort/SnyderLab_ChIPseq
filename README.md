@@ -25,3 +25,22 @@ reads to the designated reference genome using [Bowtie2](https://bowtie-bio.sour
 based on the provided UMI fastq files using Tim Parnell's [UMIScripts](https://github.com/HuntsmanCancerInstitute/UMIScripts/tree/master)
 tool, convert sam to sorted bam files using [Samtools](http://www.htslib.org/), and will export summary files from alignment and 
 deduplication.
+
+## Step 2: Peak Calling
+### ```peak_calling.sh```
+```
+Usage: peak_calling.sh [{-e|--experimental} experimental] [{-c|--control} control] [{-o|--output} name] [{-g|--genome} genome] [{-q|--qvalue} Optional:q-value]
+
+This bash script will take an input experimental (chip) bam file and a control (input)
+bam file, genome, output directory name, and an optional q-value cutoff. 
+It will return Macs2 called peaks in .bed format, bigwig files for chip and control samples,
+and will run HOMER to find enriched motifs and annotate peaks.
+
+{-e|--experimental} chip           -- Experimental bam file
+{-c|--control} input control       -- Control bam file
+{-o|--output} name                 -- Set name of output directory and file headers
+{-g|--genome} genome               -- Input genome that bam files are aligned to (mm10, mm39, hg19, hg38)
+{-q|--qvalue} qvalue               -- Optional: Set q-value cutoff for Macs2. Default=0.01
+{-h|--help}                        -- Prints this help message and exits
+```
+
