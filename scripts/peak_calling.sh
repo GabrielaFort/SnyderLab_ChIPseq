@@ -134,7 +134,70 @@ fi
 mkdir $name
 cd $name
 
-### next need to get chrom sizes files and assign them based on input genome...
+echo "-------------------------------------------------------" > peakcalling_summary.out
+echo "Starting peak calling script for $chip (experimental) and $control (control) samples" >> peakcalling_summary.out
+echo "Job started at: `date`" >> peakcalling_summary.out
+echo -e "-------------------------------------------------------\n" >> peakcalling_summary.out
+
+echo -e "*******Input Parameters*******\nControl file: $control \nExperimental file: $chip \nGenome build: $genome \n qvalue: $qvalue \nName of output dir/files: $name \n" >> peakcalling_summary.out
+
+
+# Assign chrom sizes files to variables based on input genome
+if [ $genome == hg19 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg19.chrom.sizes'
+  gsize='hs'
+elif [ $genome == hg19 ] 
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg38.chrom.sizes'
+  gsize='hs'
+elif [ $genome == mm10 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/mm10.chrom.sizes'
+  gsize='mm'
+elif [ $genome == mm39 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/mm39.chrom.sizes'
+  gsize='mm'
+fi
+
+
+echo -e "Starting Macs2 peak calling...\n" >> peakcalling_summary.out
+# Using macs2 (CHPC-installed) to call peaks
+macs2 callpeak -t $chip -c $control --bdg -f BAMPE -g $gsize --SPMR -q $qvalue --keep-dup all -n $name
+
+echo -e "Converting bdg files to bw files...\n" >> peakcalling_summary.out
+# Creating bw file from bdg file for control and exp samples
+exp_bdg=${name}_treat_pileup.bdg
+ctrl_bdg=${name}_control_lambda.bdg
+
+bedGraphToBigWig ./$exp_bdg $input_genome ./${name}.bw
+bedGraphToBigWig ./$ctrl_bdg $input_genome ./${name}_control.bw
+
+echo -e "Annotating called peaks...\n" >> peakcalling_summary.out
+# Annotating called peaks using homer suite
+annotatePeaks.pl ./${name}_peaks_narrowPeak $genome -go ./GO_analysis -annStats ${name}.annotation.stats.log > ${Prefix_name}_annotation.txt
+
+echo -e "Running HOMER motif analysis...\n" >> peakcalling_summary.out
+# Now running HOMER motif analysis
+mkdir homer
+
+# Use summits bed file for HOMER analysis
+# Sort bed file
+sort -k1,1 -k2,2n ${name}_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}' OFS="\t" > ./homer/${name}.sorted.bed
+
+# Now run homer to find enriched motifs
+findMotifsGenome.pl ./homer/${name}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
+
+
+echo -e "Updating bed file to include peak annotations:\n" >> peakcalling_summary.out
+# Call python script to update narrowpeak file with annotated gene names
+
+num_peaks=$(wc -l ${name}_peaks_narrowPeak)
+echo -e "*****Summary******" >> peakcalling_summary.out
+echo -e "Number of called peaks: $num_peaks \n" >> peakcalling_summary.out
+echo -e "Job finished at `date`" >> peakcalling_summary.out
+
 
 
 
