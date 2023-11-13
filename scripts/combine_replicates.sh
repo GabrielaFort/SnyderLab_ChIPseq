@@ -152,7 +152,10 @@ fi
 mkdir $output
 cd $output
 
+echo -e "--------------------------------\nStarting replicate peak intersection at `date`\n--------------------------------------" > combinereps_summary.out
 
+
+echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
 # determine largest peak file and find overlaps with other peak file
 if [ wc -l ${bed_r1} -ge wc -l ${bed_r2} ]
 then
@@ -163,10 +166,11 @@ else
   bedtools intersect -a ${summit_r2} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
 fi
 
-
+echo -e "Annotating peaks...\n" >> combinereps_summary.out
 # Annotate peaks
 annotatePeaks.pl ${output}_intersect.bed $genome -go ./GO_intersect -annStats ${output}_intersect_annotation.log > ${output}_intersect_annotation.txt
 
+echo -e "Running homer...\n" >> combinereps_summary.out
 # Run homer 
 mkdir homer
 
@@ -176,19 +180,21 @@ sort -k1,1 -k2,2n ${output}_intersect_summits.bed | uniq | awk '{print $1,$2-50,
 # Now run homer to find enriched motifs
 findMotifsGenome.pl ./homer/${output}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
 
-
-
+echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
 # Add annotated peaks to merged bed files with python script
-
 module use $HOME/MyModules/miniconda3
+module load miniconda3/latest
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
-python3 annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
+python3 /uufs/chpc.utah.edu/common/home/snydere-group1/bin/annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
 
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 conda deactivate
- 
 
+num_peaks=$(wc -l ${output}_intersect.bed) 
+echo -e "---------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n---------------------------------------" >> combinereps_summary.out
 
 
 
