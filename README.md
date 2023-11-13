@@ -43,7 +43,7 @@ and will run HOMER to find enriched motifs and annotate peaks.
 {-q|--qvalue} qvalue               -- Optional: Set q-value cutoff for Macs2. Default=0.01
 {-h|--help}                        -- Prints this help message and exits
 ```
-This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling tool on two input bam files - an experimental (chip) file and a control (input) file. It will also run [HOMER motif enrichment analysis](http://homer.ucsd.edu/homer/motif/) (findMotifsGenome.pl) on called peaks and will annotate peaks to the nearest TSS using the HOMER suite's [annotation tool](http://homer.ucsd.edu/homer/ngs/annotation.html) and will append the annotated gene names to the output bed file from Macs2.
+This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling tool on two input bam files - an experimental (chip) file and a control (input) file. It will also run [HOMER motif enrichment analysis](http://homer.ucsd.edu/homer/motif/) (findMotifsGenome.pl) on called peaks and will annotate peaks to the nearest TSS and run GO enrichment analysis on annotated peaks using the HOMER suite's [annotation tool](http://homer.ucsd.edu/homer/ngs/annotation.html) and will append the annotated gene names to the output bed file from Macs2.
 
 *Note This script relies on Python and users should follow [CHPC's instructions](https://www.chpc.utah.edu/documentation/software/python-anaconda.php) for installing miniconda into their home directories. The environment used to run these scripts must then be downloaded from the included [env.yaml](https://github.com/GabrielaFort/SnyderLab_ChIPseq/tree/main/files/chipseq.yaml) file:
 ```
@@ -68,7 +68,7 @@ only overlapping peaks between the two replicates.
 {-o|--output} qvalue            -- Set name of output directory
 {-h|--help}                     -- Prints this help message and exits
 ```
-This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks.
+This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
 
 
 
