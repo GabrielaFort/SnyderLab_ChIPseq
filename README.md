@@ -45,7 +45,7 @@ and will run HOMER to find enriched motifs and annotate peaks.
 ```
 This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling tool on two input bam files - an experimental (chip) file and a control (input) file. It will also run [HOMER motif enrichment analysis](http://homer.ucsd.edu/homer/motif/) (findMotifsGenome.pl) on called peaks and will annotate peaks to the nearest TSS using the HOMER suite's [annotation tool](http://homer.ucsd.edu/homer/ngs/annotation.html) and will append the annotated gene names to the output bed file from Macs2.
 
-*Note This script relies on Python and users should follow [CHPC's instructions](https://www.chpc.utah.edu/documentation/software/python-anaconda.php) for installing miniconda into their home directories. The environment used to run these scripts must then be downloaded from the included [env.yaml]( file:
+*Note This script relies on Python and users should follow [CHPC's instructions](https://www.chpc.utah.edu/documentation/software/python-anaconda.php) for installing miniconda into their home directories. The environment used to run these scripts must then be downloaded from the included [env.yaml](
 ```
 conda env create --file chipseq.yaml --name chipseq
 ```
