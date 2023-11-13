@@ -188,7 +188,7 @@ source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
-python3 /uufs/chpc.utah.edu/common/home/snydere-group1/bin/annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
+annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
 
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 conda deactivate

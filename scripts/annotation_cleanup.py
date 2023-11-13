@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # Must have activated chipseq conda environment 
 
