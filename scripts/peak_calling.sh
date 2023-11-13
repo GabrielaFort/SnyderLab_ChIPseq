@@ -139,7 +139,7 @@ echo "Starting peak calling script for $chip (experimental) and $control (contro
 echo "Job started at: `date`" >> peakcalling_summary.out
 echo -e "-------------------------------------------------------\n" >> peakcalling_summary.out
 
-echo -e "*******Input Parameters*******\nControl file: $control \nExperimental file: $chip \nGenome build: $genome \n qvalue: $qvalue \nName of output dir/files: $name \n" >> peakcalling_summary.out
+echo -e "*******Input Parameters*******\nControl file: $control \nExperimental file: $chip \nGenome build: $genome \nqvalue: $qvalue \nName of output dir/files: $name \n" >> peakcalling_summary.out
 
 
 # Assign chrom sizes files to variables based on input genome
@@ -176,7 +176,7 @@ bedGraphToBigWig ./$ctrl_bdg $input_genome ./${name}_control.bw
 
 echo -e "Annotating called peaks...\n" >> peakcalling_summary.out
 # Annotating called peaks using homer suite
-annotatePeaks.pl ./${name}_peaks_narrowPeak $genome -go ./GO_analysis -annStats ${name}.annotation.stats.log > ${Prefix_name}_annotation.txt
+annotatePeaks.pl ./${name}_peaks.narrowPeak $genome -go ./GO_analysis -annStats ${name}.annotation.stats.log > ${name}_annotation.txt
 
 echo -e "Running HOMER motif analysis...\n" >> peakcalling_summary.out
 # Now running HOMER motif analysis
@@ -192,8 +192,18 @@ findMotifsGenome.pl ./homer/${name}.sorted.bed $genome ./homer -size 100 -mask -
 
 echo -e "Updating bed file to include peak annotations:\n" >> peakcalling_summary.out
 # Call python script to update narrowpeak file with annotated gene names
+# This script will take the output bed and annotated bed files, and append mouse and human gene annotations to 
+# the narrowPeak bed file...
 
-num_peaks=$(wc -l ${name}_peaks_narrowPeak)
+module use $HOME/MyModules/miniconda3
+conda activate chipseq
+
+# Launch python script with appropriate command line options (will be parsed from within the script)
+python3 annotation_cleanup.py -b ${name}_peaks.narrowPeak -a ${Prefix_name}_annotation.txt -g $genome
+
+conda deactivate
+
+num_peaks=$(wc -l ${name}_peaks.narrowPeak)
 echo -e "*****Summary******" >> peakcalling_summary.out
 echo -e "Number of called peaks: $num_peaks \n" >> peakcalling_summary.out
 echo -e "Job finished at `date`" >> peakcalling_summary.out
