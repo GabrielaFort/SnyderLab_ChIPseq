@@ -152,7 +152,7 @@ fi
 mkdir $output
 cd $output
 
-echo -e "--------------------------------\nStarting replicate peak intersection at `date`\n--------------------------------------" > combinereps_summary.out
+echo -e "--------------------------------\nStarting replicate peak intersection at `date`\n------------------------------------------" > combinereps_summary.out
 
 
 echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
