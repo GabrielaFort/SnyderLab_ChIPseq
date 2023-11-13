@@ -26,7 +26,7 @@ based on the provided UMI fastq files using Tim Parnell's [UMIScripts](https://g
 tool, convert sam to sorted bam files using [Samtools](http://www.htslib.org/), and will export summary files from alignment and 
 deduplication.
 
-## Step 2: Peak Calling
+## Step 2: Peak Calling/Annotation/Motif Enrichment
 ### ```peak_calling.sh```
 ```
 Usage: peak_calling.sh [{-e|--experimental} experimental] [{-c|--control} control] [{-o|--output} name] [{-g|--genome} genome] [{-q|--qvalue} Optional:q-value]
@@ -49,6 +49,26 @@ This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling t
 ```
 conda env create --file chipseq.yaml --name chipseq
 ```
+
+## Step 3: Combining Biological Replicates
+### ```combine_replicates.sh```
+```
+Usage: combine_replicates.sh [{-a|--abed} Bed_R1] [{-b|--bbed} Bed_R2] [{-as|--asummit} Summit_R1] [{-bs|--bsummit} Summit_R2] [{-o|--output} name] [{-g|--genome} genome]
+
+This bash script will take bed and summit bed files from
+two replicates, a reference genome, and an output directory name.
+It will return bed files, annotations and HOMER analysis on
+only overlapping peaks between the two replicates.
+
+{-a|--abed} R1_bed              -- R1 bed file
+{-b|--bbed} R2_bed              -- R2 bed file
+{-as|--asummit} R1_summit       -- R1 summit bed file
+{-bs|--bsummit} R1_summit       -- R2 summit bed file
+{-g|--genome} genome            -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)
+{-o|--output} qvalue            -- Set name of output directory
+{-h|--help}                     -- Prints this help message and exits
+```
+This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks.
 
 
 
