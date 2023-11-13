@@ -157,13 +157,13 @@ echo -e "--------------------------------\nStarting replicate peak intersection 
 
 echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
 # determine largest peak file and find overlaps with other peak file
-if [ wc -l ${bed_r1} -ge wc -l ${bed_r2} ]
+if [ wc -l ../${bed_r1} -ge wc -l ../${bed_r2} ]
 then
-  bedtools intersect -a ${bed_r1} -b ${bed_r2} -wa | uniq > ${output}_intersect.bed
-  bedtools intersect -a ${summit_r1} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
+  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq > ${output}_intersect.bed
+  bedtools intersect -a ../${summit_r1} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
 else
-  bedtools intersect -a ${bed_r2} -b ${bed_r1} -wa | uniq > ${output}_intersect.bed
-  bedtools intersect -a ${summit_r2} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
+  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq > ${output}_intersect.bed
+  bedtools intersect -a ../${summit_r2} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
 fi
 
 echo -e "Annotating peaks...\n" >> combinereps_summary.out
