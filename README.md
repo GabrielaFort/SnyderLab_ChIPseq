@@ -49,6 +49,10 @@ This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling t
 ```
 conda env create --file chipseq.yaml --name chipseq
 ```
+* These steps can be run automatically by navigating into the 'scripts' directory of this repo and running the ```config.sh``` script: 
+```
+./config.sh
+```
 
 ## Step 3: Combining Biological Replicates
 ### ```combine_replicates.sh```
@@ -69,6 +73,22 @@ only overlapping peaks between the two replicates.
 {-h|--help}                     -- Prints this help message and exits
 ```
 This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
+
+## Configuration:
+### Cloning this repository
+Clone this repository into your home (~) directory:
+
+
+Add executable files located in ```SnyderLab_ChIPseq/scripts``` to your path variable so that they are accessable from anywhere:
+
+
+### Configuring Python
+Many of these scripts require python - CHPC does not maintain a central python distribution, so miniconda/python must be user installed.
+To configure python and the miniconda environment used to run these analyses, run the ```config.sh``` script from the scripts directory of this cloned repo:
+```
+cd $HOME/SnyderLab_ChIPseq/scripts
+./config.sh
+```
 
 
 
