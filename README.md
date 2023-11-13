@@ -6,6 +6,30 @@ A set of scripts and tools for analysis of ChIP-sequencing datasets. Includes us
 of fastq files, peak calling, motif finding, peak annotation, merging replicates, identification of differential 
 peaks between samples, and intersecting ChIP-seq and RNA-seq datasets.
 
+## Configuration:
+### Cloning this repository
+Clone this repository into your home (~) directory:
+```
+git clone https://github.com/GabrielaFort/SnyderLab_ChIPseq.git
+```
+
+Add executable files located in ```SnyderLab_ChIPseq/scripts``` to your path variable so that they are accessable from anywhere:
+```
+vi ~/.bashrc
+```
+Add this new line underneath where it says export PATH=.....:
+```
+export PATH=/uufs/chpc.utah.edu/common/home/uID/SnyderLab_ChIPseq/scripts:$PATH
+```
+
+### Configuring Python
+Many of these scripts require python - CHPC does not maintain a central python distribution, so miniconda/python must be user installed.
+To configure python and the miniconda environment used to run these analyses, run the ```config.sh``` script from the scripts directory of this cloned repo:
+```
+cd $HOME/SnyderLab_ChIPseq/scripts
+./config.sh
+```
+
 ## Step 1: Alignment 
 ### ```alignment.sh```
 ```
@@ -74,29 +98,6 @@ only overlapping peaks between the two replicates.
 ```
 This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
 
-## Configuration:
-### Cloning this repository
-Clone this repository into your home (~) directory:
-```
-git clone https://github.com/GabrielaFort/SnyderLab_ChIPseq.git
-```
-
-Add executable files located in ```SnyderLab_ChIPseq/scripts``` to your path variable so that they are accessable from anywhere:
-```
-vi ~/.bashrc
-```
-Add this new line underneath where it says export PATH=.....:
-```
-export PATH=/uufs/chpc.utah.edu/common/home/uID/SnyderLab_ChIPseq/scripts:$PATH
-```
-
-### Configuring Python
-Many of these scripts require python - CHPC does not maintain a central python distribution, so miniconda/python must be user installed.
-To configure python and the miniconda environment used to run these analyses, run the ```config.sh``` script from the scripts directory of this cloned repo:
-```
-cd $HOME/SnyderLab_ChIPseq/scripts
-./config.sh
-```
 
 
 
