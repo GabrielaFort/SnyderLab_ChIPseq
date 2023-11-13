@@ -77,10 +77,18 @@ This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/
 ## Configuration:
 ### Cloning this repository
 Clone this repository into your home (~) directory:
-
+```
+git clone https://github.com/GabrielaFort/SnyderLab_ChIPseq.git
+```
 
 Add executable files located in ```SnyderLab_ChIPseq/scripts``` to your path variable so that they are accessable from anywhere:
-
+```
+vi ~/.bashrc
+```
+Add this new line underneath where it says export PATH=.....:
+```
+export PATH=/uufs/chpc.utah.edu/common/home/uID/SnyderLab_ChIPseq/scripts:$PATH
+```
 
 ### Configuring Python
 Many of these scripts require python - CHPC does not maintain a central python distribution, so miniconda/python must be user installed.
