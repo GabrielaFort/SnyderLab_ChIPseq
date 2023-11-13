@@ -29,6 +29,7 @@ To configure python and the miniconda environment used to run these analyses, ru
 cd $HOME/SnyderLab_ChIPseq/scripts
 ./config.sh
 ```
+*Only perform this step once!
 
 ## Step 1: Alignment 
 ### ```alignment.sh```
