@@ -12,4 +12,4 @@ cp /uufs/chpc.utah.edu/sys/installdir/python/modules/miniconda3/latest.lua $HOME
 module use $HOME/MyModules
 module load miniconda3/latest
 
-conda env create --file ../files/chipseq.yaml --name chipseq
+conda env create --file ../files/GFchipseq.yaml --name chipseq
