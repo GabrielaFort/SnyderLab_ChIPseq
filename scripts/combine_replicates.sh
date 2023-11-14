@@ -177,6 +177,10 @@ mkdir homer
 # Sort bed file
 sort -k1,1 -k2,2n ${output}_intersect_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}' OFS="\t" > ./homer/${output}.sorted.bed
 
+
+
+
+
 # Now run homer to find enriched motifs
 findMotifsGenome.pl ./homer/${output}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
 
