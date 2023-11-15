@@ -41,13 +41,11 @@ new=merge[["chr","start","end","id","score","strand","signal","pval","qval","pea
 
 # The start, end, and score columns have been converted into floats by pandas
 # Need to change back to ints
-format_dict = {
-    'start': '{:.0%}','end': '{:.0%}','score': '{:.0%}'
-}
 
-new=new.style.format(format_dict)
+new=new.fillna(0)
+new=new.astype({"start":'int',"end":'int',"score":'int'})
 
-
+# save as tab separated bed file
 new.to_csv(bed_file, sep='\t',index=False,header=False)
 
 
