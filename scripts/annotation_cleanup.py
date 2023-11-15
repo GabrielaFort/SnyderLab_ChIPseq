@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Must have activated chipseq conda environment 
 
@@ -41,13 +41,11 @@ new=merge[["chr","start","end","id","score","strand","signal","pval","qval","pea
 
 # The start, end, and score columns have been converted into floats by pandas
 # Need to change back to ints
-# Note the value is a format STRING, NOT a function!
 format_dict = {
     'start': '{:.0%}','end': '{:.0%}','score': '{:.0%}'
 }
 
-# our dataframe containing the data is called contribution
-new=new.head().style.format(format_dict)
+new=new.style.format(format_dict)
 
 
 new.to_csv(bed_file, sep='\t',index=False,header=False)
