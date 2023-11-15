@@ -29,7 +29,7 @@ To configure python and the miniconda environment used to run these analyses, ru
 cd $HOME/SnyderLab_ChIPseq/scripts
 ./config.sh
 ```
-Note:Only perform this step once!
+Note: Only perform this step once!
 
 ## Step 1: Alignment 
 ### ```alignment.sh```
@@ -73,22 +73,22 @@ This script will run the [Macs2](https://pypi.org/project/MACS2/) peak calling t
 ## Step 3: Combining Biological Replicates
 ### ```combine_replicates.sh```
 ```
-Usage: combine_replicates.sh [{-a|--abed} Bed_R1] [{-b|--bbed} Bed_R2] [{-as|--asummit} Summit_R1] [{-bs|--bsummit} Summit_R2] [{-o|--output} name] [{-g|--genome} genome]
+Usage: combine_replicates.sh [{-a|--rep1} Replicate1] [{-b|--rep2} Replicate2] [{-o|--output} name] [{-g|--genome} genome]
 
-This bash script will take bed and summit bed files from
+This bash script will take paths to Macs2 output directories from
 two replicates, a reference genome, and an output directory name.
-It will return bed files, annotations and HOMER analysis on
-only overlapping peaks between the two replicates.
+It will return bed files, merged bw files, and annotations and HOMER analysis on
+only overlapping peaks between the two replicates. It will also use deeptools to
+create tornado plots of the two replicates side by side.
 
-{-a|--abed} R1_bed              -- R1 bed file
-{-b|--bbed} R2_bed              -- R2 bed file
-{-as|--asummit} R1_summit       -- R1 summit bed file
-{-bs|--bsummit} R1_summit       -- R2 summit bed file
+{-a|--rep1} Replicate1          -- Path to peak calling output directory for Rep 1
+{-b|--rep2} Replicate2          -- Path to peak calling output directory for Rep2
 {-g|--genome} genome            -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)
 {-o|--output} qvalue            -- Set name of output directory
 {-h|--help}                     -- Prints this help message and exits
 ```
-This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the bed files and summit files that are output from Macs2 for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
+This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the path to the directory that is output from the Macs2 peak calling script for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, a merged bw file, tornado plots, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
+**Note:** In order for this script to work - do not change the names of the output directories or files from step 2: ```peak_calling.sh```!  
 
 
 
