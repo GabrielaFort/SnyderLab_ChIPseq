@@ -84,7 +84,7 @@ create tornado plots of the two replicates side by side.
 {-a|--rep1} Replicate1          -- Path to peak calling output directory for Rep 1
 {-b|--rep2} Replicate2          -- Path to peak calling output directory for Rep2
 {-g|--genome} genome            -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)
-{-o|--output} qvalue            -- Set name of output directory
+{-o|--output} name              -- Set name of output directory
 {-h|--help}                     -- Prints this help message and exits
 ```
 This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the path to the directory that is output from the Macs2 peak calling script for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, a merged bw file, tornado plots, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
