@@ -36,7 +36,7 @@ help_fun()
     echo "{-a|--rep1} Replicate1          -- Path to peak calling output directory for Rep 1"
     echo "{-b|--rep2} Replicate2          -- Path to peak calling output directory for Rep2"
     echo "{-g|--genome} genome            -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)"
-    echo "{-o|--output} qvalue            -- Set name of output directory" 
+    echo "{-o|--output} name              -- Set name of output directory" 
     echo "{-h|--help}                     -- Prints this help message and exits"
     exit 0
 }
@@ -54,12 +54,12 @@ flags()
         (-a|--rep1)
             shift
             [ $# = 0 ] && error "No R1 bed file specified"
-            export r1_path="$1"
+            export r1_path=$(echo "$1" | sed 's:/*$::')
             shift;;
         (-b|--rep2)
             shift
             [ $# = 0 ] && error "No R2 bed file specified"
-            export r2_path="$1"
+            export r2_path=$(echo "$1" | sed 's:/*$::')
             shift;;
         (-g|--genome)
             shift
@@ -123,12 +123,28 @@ fi
 # Find and assign files to variables
 base_r1=$(basename $r1_path)
 base_r2=$(basename $r2_path)
-bed_r1=$(${r1_path}/${base_r1}_peaks.narrowPeak)
-bed_r2=$(${r2_path}/${base_r2}_peaks.narrowPeak)
-bw_r1=$(${r1_path}/${base_r1}.bw)
-bw_r2=$(${r2_path}/${base_r2}.bw)
-summit_r1=$(${r1_path}/${base_r1}_summits.bed)
-summit_r2=$(${r2_path}/${base_r2}_summits.bed)
+bed_r1=$(echo ${r1_path}/${base_r1}_peaks.narrowPeak)
+bed_r2=$(echo ${r2_path}/${base_r2}_peaks.narrowPeak)
+bw_r1=$(echo ${r1_path}/${base_r1}.bw)
+bw_r2=$(echo ${r2_path}/${base_r2}.bw)
+summit_r1=$(echo ${r1_path}/${base_r1}_summits.bed)
+summit_r2=$(echo ${r2_path}/${base_r2}_summits.bed)
+
+
+# Assign chrom sizes files to variables based on input genome
+if [ $genome == hg19 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg19.chrom.sizes'
+elif [ $genome == hg19 ] 
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg38.chrom.sizes'
+elif [ $genome == mm10 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/mm10.chrom.sizes'
+elif [ $genome == mm39 ]
+then
+  input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/mm39.chrom.sizes'
+fi
 
 
 # Make directory with input name and navigate into it
@@ -139,22 +155,29 @@ echo -e "--------------------------------\nStarting replicate peak intersection 
 
 
 echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
+
 # determine largest peak file and find overlaps with other peak file
-if [ wc -l ../${bed_r1} -ge wc -l ../${bed_r2} ]
+size_r1=$(wc -l <../"${bed_r1}")
+size_r2=$(wc -l <../"${bed_r2}")
+
+if [ ${size_r1} -ge ${size_r2} ]
 then
-  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq > ${output}_intersect.bed
-  bedtools intersect -a ../${summit_r1} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
-else
-  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq > ${output}_intersect.bed
-  bedtools intersect -a ../${summit_r2} -b ${output}_intersect.bed -wa > ${output}_intersect_summits.bed
+  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n > ${output}_intersect.bed
+elif [ ${size_r2} -ge ${size_r1} ]
+then
+  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n > ${output}_intersect.bed
 fi
+
+# Create summit.bed file from intersected bed file
+awk '{print $1,$2+$10,$2+$10+1,$4,$5}' OFS="\t" ${output}_intersect.bed > ${output}_intersect_summits.bed
+
 
 # create merged bw files
 echo -e "Creating merged bw files...\n" >> combinereps_summary.out
 bigWigMerge ../${bw_r1} ../${bw_r2} merged.bedGraph
-bedGraphToBigWig merged.bedGraph $genome merged.bw
-
-
+sort -k1,1 -k2,2n merged.bedGraph > sorted.merged.bedGraph
+bedGraphToBigWig sorted.merged.bedGraph $input_genome merged.bw
+rm sorted.merged.bedGraph
 
 echo -e "Annotating peaks...\n" >> combinereps_summary.out
 # Annotate peaks
