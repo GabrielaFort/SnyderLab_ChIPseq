@@ -5,6 +5,7 @@
 
 # Loading macs2
 module load macs/2.2.7
+module use $HOME/MyModules/miniconda3
 
 # must have homer installed and in path
 # this script also uses bedGraphtoBigWig
@@ -195,15 +196,19 @@ echo -e "Updating bed file to include peak annotations:\n" >> peakcalling_summar
 # This script will take the output bed and annotated bed files, and append mouse and human gene annotations to 
 # the narrowPeak bed file...
 
-module use $HOME/MyModules/miniconda3
-module load miniconda3/latest
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
+
+# Activate conda environment
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
 annotation_cleanup.py -b ${name}_peaks.narrowPeak -a ${name}_annotation.txt -g $genome
 
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
+
+# Make tornado plots and coverage plot of peaks
+deeptoolsplots.sh --bed ${name}_peaks.narrowPeak --bw ${name}.bw
+
 conda deactivate
 
 num_peaks=$(wc -l ${name}_peaks.narrowPeak)
