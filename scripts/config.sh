@@ -10,6 +10,6 @@ cp /uufs/chpc.utah.edu/sys/installdir/python/modules/miniconda3/latest.lua $HOME
 
 # Load chipseq conda environment for chipseq analysis
 module use $HOME/MyModules
-module load miniconda3/latest
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 
 conda env create --file ../files/GFchipseq.yaml --name chipseq
