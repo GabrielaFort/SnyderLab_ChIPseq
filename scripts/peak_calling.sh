@@ -206,8 +206,11 @@ annotation_cleanup.py -b ${name}_peaks.narrowPeak -a ${name}_annotation.txt -g $
 
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 
-# Make tornado plots and coverage plot of peaks
-deeptoolsplots.sh --bed ${name}_peaks.narrowPeak --bw ${name}.bw
+# Make tornado plots and coverage plot of peaks using deeptools
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --skipZeros -o ${name}.matrix.gz 
+
+# Plot heatmap with different kmeans clusters
+plotHeatmap -m matrix.gz -out ${name}_tornadoplot.pdf 
 
 conda deactivate
 
