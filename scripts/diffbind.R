@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript --vanilla
+
+
 ### DiffBind
 # GF 042723
 # This script will take a sample sheet file called diffbind.csv, run differential
@@ -27,11 +30,10 @@ library("profileplyr")
 
 register(SerialParam())
 
-
+# Retrieve args from the command line
 args <- commandArgs(trailingOnly = TRUE)
 sampleSheet = args[1]
-mydir = args[2]
-fdr = args[3]
+fdr = args[2]
 
 sample<-read.csv(paste(mydir, sampleSheet, sep="/"))
 
