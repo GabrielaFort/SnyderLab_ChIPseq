@@ -67,12 +67,10 @@ write.table(out_results, file="./diffbind_results.bed", sep="\t", quote=F, row.n
 # where the condition you added first in your sheet is condition 1
 
 cond1_diff <- out_results %>%
-  filter(FDR < fdr & Fold < 0) %>%
-  select(seqnames, start, end)
+  filter(FDR < fdr & Fold < 0)
 
 cond2_diff <- out_results %>% 
-  filter(FDR < fdr & Fold > 0) %>% 
-  select(seqnames, start, end)
+  filter(FDR < fdr & Fold > 0)
 
 # Write to file
 write.table(cond1_diff, file="condition1_enriched.bed", sep="\t", quote=F, row.names=F, col.names=F)
