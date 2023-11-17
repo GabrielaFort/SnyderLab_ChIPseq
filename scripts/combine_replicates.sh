@@ -202,7 +202,6 @@ echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 module use $HOME/MyModules/miniconda3
 module load miniconda3/latest
-# Activate conda env
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
@@ -217,8 +216,7 @@ plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMa
 
 rm ${output}.matrix.gz
 
-source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
-conda deactivate
+conda activate base
 
 num_peaks=$(wc -l ${output}_intersect.bed) 
 echo -e "---------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n---------------------------------------" >> combinereps_summary.out

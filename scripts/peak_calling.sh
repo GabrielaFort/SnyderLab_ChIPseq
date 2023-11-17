@@ -212,8 +212,7 @@ plotHeatmap -m ${name}.matrix.gz -out ${name}_tornadoplot.pdf --colorMap RdYlBu_
 
 rm ${name}.matrix.gz
 
-source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
-conda deactivate
+conda activate base
 
 num_peaks=$(wc -l ${name}_peaks.narrowPeak)
 echo -e "*****Summary******" >> peakcalling_summary.out
