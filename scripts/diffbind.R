@@ -35,8 +35,11 @@ args <- commandArgs(trailingOnly = TRUE)
 sampleSheet = args[1]
 fdr = args[2]
 
-sample<-read.csv(paste(mydir, sampleSheet, sep="/"))
+sample<-read.csv(sampleSheet)
 
+# Save two conditions as variables (R is 1 indexed...)
+cond1 <- (unique(sample$Condition))[1]
+cond2 <- (unique(sample$Condition))[2]
 
 # Perform diffbind steps according to tutorial
 dbobj<-dba(sampleSheet=sample)
@@ -74,9 +77,11 @@ cond1_diff <- out_results %>%
 cond2_diff <- out_results %>% 
   filter(FDR < fdr & Fold > 0)
 
-# Write to file
-write.table(cond1_diff, file="condition1_enriched.bed", sep="\t", quote=F, row.names=F, col.names=F)
-write.table(cond2_diff, file="condition2_enriched.bed", sep="\t", quote=F, row.names=F, col.names=F)
+# Write differential peaks to file
+file1 <- paste(cond1,'_enriched.bed',sep='')
+file2 <- paste(cond2,'_enriched.bed',sep='')
+write.table(cond1_diff, file=file1, sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond2_diff, file=file2, sep="\t", quote=F, row.names=F, col.names=F)
 
 
 ### Now exporting a bunch of potentially useful graphs ##
