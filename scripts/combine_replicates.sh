@@ -5,7 +5,6 @@
 
 # loading modules
 module load bedtools
-module use $HOME/MyModules/miniconda3
 # must have homer installed and in path as well! 
 
 ###### Parsing command line arguments ######
@@ -198,7 +197,11 @@ findMotifsGenome.pl ./homer/${output}.sorted.bed $genome ./homer -size 100 -mask
 echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
 # Add annotated peaks to merged bed files with python script
 
-source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
+
+
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
+module use $HOME/MyModules/miniconda3
+module load miniconda3/latest
 # Activate conda env
 conda activate chipseq
 
