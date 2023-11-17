@@ -5,10 +5,24 @@
 # of significant enriched peaks in each condition, and important graphs
 
 
-#Load necessary packages
+# Install necessary packages
+package_list <- c("DiffBind","tidyverse","BiocParallel","devtools")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) {
+  install.packages(new.packages)
+}
+
+# Need older version of ggtree installed to be compatible with profileplyr (necessary for tornado plots)
+if(!"profileplyr" %in% installed.packages()) {
+  library(devtools)
+  devtools::install_github("YuLab-SMU/ggtree")
+  BiocManager::install("profileplyr")
+}
+
+# Load packages
 library("DiffBind")
-library(tidyverse)
-library(BiocParallel)
+library("tidyverse")
+library("BiocParallel")
 library("profileplyr")
 
 register(SerialParam())
