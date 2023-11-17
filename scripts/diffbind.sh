@@ -4,22 +4,16 @@
 #SBATCH --partition=kingspeak
 
 
-echo "Taking input from $1"
-
+# Format input arguments - argument 1 is the diffbind file arg 2 is the fdr cutoff
 ### arg 1 is diffbind csv file
-### arg 2 is genome 
-### arg 3 is FDR cutoff 
-
-
-mypath=$(pwd)
-
+### arg 2 is FDR cutoff 
 
 # Load R (version 4.1.3)
 module load R/4.1.3
 
 echo "Running diffbind R script"
 # Run the R script in batch, redirecting the job output to a file
-Rscript /uufs/chpc.utah.edu/common/home/snydere-group1/bin/diffbind_FDR05.R $1 $mypath > $SLURM_JOBID.out
+diffbind.R $diff_file $FDR > diffbind_summary.out
 
 
 # Annotate output files
