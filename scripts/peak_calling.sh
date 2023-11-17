@@ -191,27 +191,28 @@ sort -k1,1 -k2,2n ${name}_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}
 findMotifsGenome.pl ./homer/${name}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
 
 
-echo -e "Updating bed file to include peak annotations:\n" >> peakcalling_summary.out
+echo -e "Updating bed file to include peak annotations...\n" >> peakcalling_summary.out
 # Call python script to update narrowpeak file with annotated gene names
 # This script will take the output bed and annotated bed files, and append mouse and human gene annotations to 
 # the narrowPeak bed file...
 
-source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
-
 # Activate conda environment
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
 annotation_cleanup.py -b ${name}_peaks.narrowPeak -a ${name}_annotation.txt -g $genome
 
-source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
-
+echo -e "Making plots...\n" >> peakcalling_summary.out
 # Make tornado plots and coverage plot of peaks using deeptools
-computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --skipZeros -o ${name}.matrix.gz 
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --missingDataAsZero --skipZeros -o ${name}.matrix.gz 
 
 # Plot heatmap 
-plotHeatmap -m matrix.gz -out ${name}_tornadoplot.pdf --colormap RdYlBu_r 
+plotHeatmap -m ${name}.matrix.gz -out ${name}_tornadoplot.pdf --colormap RdYlBu_r 
 
+rm ${name}.matrix.gz
+
+source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 conda deactivate
 
 num_peaks=$(wc -l ${name}_peaks.narrowPeak)
