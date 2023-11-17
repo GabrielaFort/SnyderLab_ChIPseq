@@ -208,9 +208,9 @@ annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotati
 echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
 
 # Make deeptools tornado plot of coverage of both replicates at intersected peaks
-computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 --skipZeros -o ${output}.matrix.gz 
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 ---missingDataAsZero --skipZeros -o ${output}.matrix.gz 
 # Plot heatmap 
-plotHeatmap -m matrix.gz -out ${output}_reps_tornadoplot.pdf --colormap RdYlBu_r 
+plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colormap RdYlBu_r 
 
 rm ${output}.matrix.gz
 
