@@ -208,7 +208,7 @@ echo -e "Making plots...\n" >> peakcalling_summary.out
 computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --missingDataAsZero --skipZeros -o ${name}.matrix.gz 
 
 # Plot heatmap 
-plotHeatmap -m ${name}.matrix.gz -out ${name}_tornadoplot.pdf --colormap RdYlBu_r 
+plotHeatmap -m ${name}.matrix.gz -out ${name}_tornadoplot.pdf --colorMap RdYlBu_r 
 
 rm ${name}.matrix.gz
 
