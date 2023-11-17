@@ -135,7 +135,7 @@ summit_r2=$(echo ${r2_path}/${base_r2}_summits.bed)
 if [ $genome == hg19 ]
 then
   input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg19.chrom.sizes'
-elif [ $genome == hg19 ] 
+elif [ $genome == hg38 ] 
 then
   input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg38.chrom.sizes'
 elif [ $genome == mm10 ]
@@ -205,13 +205,21 @@ conda activate chipseq
 # Launch python script with appropriate command line options (will be parsed from within the script)
 annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
 
+echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
+
+# Make deeptools tornado plot of coverage of both replicates at intersected peaks
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 --skipZeros -o ${output}.matrix.gz 
+# Plot heatmap 
+plotHeatmap -m matrix.gz -out ${output}_reps_tornadoplot.pdf --colormap RdYlBu_r 
+
+rm ${output}.matrix.gz
+
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 conda deactivate
 
 num_peaks=$(wc -l ${output}_intersect.bed) 
 echo -e "---------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n---------------------------------------" >> combinereps_summary.out
 
-# Create heatmap of both replicates side by side
 
 
 
