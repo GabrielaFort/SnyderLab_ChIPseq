@@ -170,8 +170,8 @@ echo -e "Converting bdg files to bw files...\n" >> peakcalling_summary.out
 exp_bdg=${name}_treat_pileup.bdg
 ctrl_bdg=${name}_control_lambda.bdg
 
-bedGraphToBigWig ./$exp_bdg $input_genome ./${name}.bw
-bedGraphToBigWig ./$ctrl_bdg $input_genome ./${name}_control.bw
+bedGraphToBigWig ./$exp_bdg $input_genome ./${name}_treat_pileup.bw
+bedGraphToBigWig ./$ctrl_bdg $input_genome ./${name}_control_lambda.bw
 
 echo -e "Annotating called peaks...\n" >> peakcalling_summary.out
 # Annotating called peaks using homer suite
@@ -205,7 +205,7 @@ annotation_cleanup.py -b ${name}_peaks.narrowPeak -a ${name}_annotation.txt -g $
 
 echo -e "Making plots...\n" >> peakcalling_summary.out
 # Make tornado plots and coverage plot of peaks using deeptools
-computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --missingDataAsZero --skipZeros -o ${name}.matrix.gz 
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}_treat_pileup.bw --missingDataAsZero --skipZeros -o ${name}.matrix.gz 
 
 # Plot heatmap 
 plotHeatmap -m ${name}.matrix.gz -out ${name}_tornadoplot.pdf --colorMap RdYlBu_r 
