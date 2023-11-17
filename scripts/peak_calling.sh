@@ -148,7 +148,7 @@ if [ $genome == hg19 ]
 then
   input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg19.chrom.sizes'
   gsize='hs'
-elif [ $genome == hg19 ] 
+elif [ $genome == hg38 ] 
 then
   input_genome=$'/uufs/chpc.utah.edu/common/home/snydere-group1/bin/chrom_sizes_macs/hg38.chrom.sizes'
   gsize='hs'
@@ -209,8 +209,8 @@ source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 # Make tornado plots and coverage plot of peaks using deeptools
 computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${name}_peaks.narrowPeak -S ${name}.bw --skipZeros -o ${name}.matrix.gz 
 
-# Plot heatmap with different kmeans clusters
-plotHeatmap -m matrix.gz -out ${name}_tornadoplot.pdf 
+# Plot heatmap 
+plotHeatmap -m matrix.gz -out ${name}_tornadoplot.pdf --colormap RdYlBu_r 
 
 conda deactivate
 
