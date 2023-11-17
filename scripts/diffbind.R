@@ -19,129 +19,103 @@ sampleSheet = args[1]
 mydir = args[2]
 fdr = args[3]
 
-#must have a sample file with this name in the working directory
 sample<-read.csv(paste(mydir, sampleSheet, sep="/"))
 
 
-#read in the sample sheet
+# Perform diffbind steps according to tutorial
 dbobj<-dba(sampleSheet=sample)
 
+dbobj<-dba.count(dbobj, bUseSummarizeOverlaps=TRUE, bRemoveDuplicates=FALSE)
 
-dbobj1<-dba.count(dbobj, bUseSummarizeOverlaps=TRUE, bRemoveDuplicates=FALSE)
+dbobj<-dba.normalize(dbobj)
 
+dbobj<-dba.contrast(dbobj, categories=DBA_CONDITION, minMembers = 2)
 
-dbobj2<-dba.normalize(dbobj1)
+dbobj<-dba.analyze(dbobj, method=DBA_ALL_METHODS)
 
+# Gives little summary
+dba.show(dbobj, bContrasts = TRUE)
 
-dbobj3<-dba.contrast(dbobj2, categories=DBA_CONDITION, minMembers = 2)
+dba.report(dbobj)
 
+###Extract results from both methods: DEseq and EDGER
+db_results <- dba.report(dbobj, method=DBA_ALL_METHODS, contrast = 1, th=1)
 
-dbobj4<-dba.analyze(dbobj3, method=DBA_ALL_METHODS)
+# Write to file - bed file format
+out_results <- as.data.frame(db_results)
 
-
-dba.show(dbobj4, bContrasts = TRUE)
-
-dba.report(dbobj4)
-
-###Extract results from DEseq and EDGER
-res_deseq <- dba.report(dbobj4, method=DBA_DESEQ2, contrast = 1, th=1)
-res_edger <- dba.report(dbobj4, method=DBA_EDGER, contrast = 1, th=1)
-
-# Write to file
-out_deseq <- as.data.frame(res_deseq)
-out_edger <- as.data.frame(res_edger)
-
-write.table(out_edger, file="./diffbind_edger.txt", sep="\t", quote=F, row.names=F)
-write.table(out_deseq, file="./diffbind_deseq2.txt", sep="\t", quote=F, row.names=F)
+# Write without column names to be compatible with bed file formatting - but include in documentation what each column is...
+write.table(out_results, file="./diffbind_results.bed", sep="\t", quote=F, row.names=F, col.names=F)
 
 # Write bed files
-# Create bed files for each condition keeping only significant peaks (p < 0.05)
+# Create bed files for each condition keeping only significant peaks (according to user defined fdr)
 # in this case, condition 1 has a negative fold change and condition 2 has a positive fold change
 # where the condition you added first in your sheet is condition 1
 
-cond2_deseq <- out_deseq %>% 
-  filter(FDR < fdr & Fold > 0) %>% 
-  select(seqnames, start, end)
-
-
-cond2_edger <- out_edger %>%
-  filter(FDR < fdr & Fold > 0) %>%
-  select(seqnames, start, end)
-	
-# Write to file
-write.table(cond2_deseq, file="condition2_enriched_deseq.bed", sep="\t", quote=F, row.names=F, col.names=F)
-write.table(cond2_edger, file="condition2_enriched_edger.bed", sep="\t", quote=F, row.names=F, col.names=F)
-
-cond1_deseq <- out_deseq %>% 
-  filter(FDR < fdr & Fold < 0) %>% 
-  select(seqnames, start, end)
-
-cond1_edger <- out_edger %>%
+cond1_diff <- out_results %>%
   filter(FDR < fdr & Fold < 0) %>%
   select(seqnames, start, end)
 
+cond2_diff <- out_results %>% 
+  filter(FDR < fdr & Fold > 0) %>% 
+  select(seqnames, start, end)
 
 # Write to file
-write.table(cond1_deseq, file="condition1_enriched_deseq.bed", sep="\t", quote=F, row.names=F, col.names=F)
-write.table(cond1_edger, file="condition1_enriched_edger.bed", sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond1_diff, file="condition1_enriched.bed", sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond2_diff, file="condition2_enriched.bed", sep="\t", quote=F, row.names=F, col.names=F)
 
 
 ### Now exporting a bunch of potentially useful graphs ##
 
 #heatmap of all merged sites
 pdf("heatmap_all.pdf")
-dba.plotHeatmap(dbobj4)
+dba.plotHeatmap(dbobj)
 dev.off()
 
 #heatmap of only differentially bound sites
 pdf("heatmap_diff.pdf")
-dba.plotHeatmap(dbobj4, contrast=1)
+dba.plotHeatmap(dbobj, contrast=1)
 dev.off()
 
 #PCA plot using all merged sites
 pdf("PCA_all.pdf")
-dba.plotPCA(dbobj4,DBA_TREATMENT,label=DBA_ID)
+dba.plotPCA(dbobj,DBA_TREATMENT,label=DBA_ID)
 dev.off()
 
 #PCA plot using only differentially bound sites
 pdf("PCA_diff.pdf")
-dba.plotPCA(dbobj4,contrast=1,label=DBA_ID)
+dba.plotPCA(dbobj,contrast=1,label=DBA_ID)
 dev.off()
 
 #Volcano plot
 pdf("volcano.pdf")
-dba.plotVolcano(dbobj4)
+dba.plotVolcano(dbobj)
 dev.off()
 
 #Box Plot
 pdf("boxplot.pdf")
-dba.plotBox(dbobj4)
+dba.plotBox(dbobj)
 dev.off()
-
 
 
 #Binding affinity heatmap using differentially bound sites
 hmap<-colorRampPalette(c("red","black","green"))(n=13)
 
 pdf("binding_heatmap.pdf")
-dba.plotHeatmap(dbobj4,contrast=1,correlations=FALSE, scale="row",colScheme=hmap)
+dba.plotHeatmap(dbobj,contrast=1,correlations=FALSE, scale="row",colScheme=hmap)
 dev.off()
-
-
 
 
 #Tornado plot of differential analysis marking gained or lost sites
-profiles <- dba.plotProfile(dbobj4)
+profiles <- dba.plotProfile(dbobj)
 
 pdf("tornado_plot.pdf")
-dba.plotProfile(profiles, matrices_color=circlize::colorRamp2(breaks=seq(0,30,length=11),colors=rev(brewer.pal(11,'RdYlBu'))))
+dba.plotProfile(profiles)
 dev.off()
 
 
-
-
 #Tornado plot of differential analysis with replicates shown separately
-profiles1<-dba.plotProfile(dbobj4, merge=NULL)
+profiles1<-dba.plotProfile(dbobj, merge=NULL)
 
 pdf("tornado_plot_reps.pdf")
 dba.plotProfile(profiles1)
@@ -149,5 +123,7 @@ dev.off()
 
 # Venn diagram of the two different analyses i.e. DEseq2 vs EdgeR
 pdf("peakspertest.pdf")
-dba.plotVenn(dbobj4,contrast=1,method=DBA_ALL_METHODS)
+dba.plotVenn(dbobj,contrast=1,method=DBA_ALL_METHODS)
 dev.off()
+
+
