@@ -198,6 +198,7 @@ echo -e "Updating bed file to include peak annotations...\n" >> peakcalling_summ
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
 module use $HOME/MyModules/miniconda3
 module load miniconda3/latest
+conda deactivate
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)

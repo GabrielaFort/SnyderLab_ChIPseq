@@ -202,6 +202,7 @@ echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 module use $HOME/MyModules/miniconda3
 module load miniconda3/latest
+conda deactivate
 conda activate chipseq
 
 # Launch python script with appropriate command line options (will be parsed from within the script)
