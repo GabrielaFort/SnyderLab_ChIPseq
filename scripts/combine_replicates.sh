@@ -150,7 +150,7 @@ fi
 mkdir $output
 cd $output
 
-echo -e "--------------------------------\nStarting replicate peak intersection at `date`\n------------------------------------------" > combinereps_summary.out
+echo -e "----------------------------------------\nStarting replicate peak intersection at `date`\n----------------------------------------" > combinereps_summary.out
 
 
 echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
@@ -161,10 +161,10 @@ size_r2=$(wc -l <../"${bed_r2}")
 
 if [ ${size_r1} -ge ${size_r2} ]
 then
-  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n > ${output}_intersect.bed
+  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
 elif [ ${size_r2} -ge ${size_r1} ]
 then
-  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n > ${output}_intersect.bed
+  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
 fi
 
 # Create summit.bed file from intersected bed file
@@ -186,26 +186,24 @@ echo -e "Running homer...\n" >> combinereps_summary.out
 # Run homer 
 mkdir homer
 
-# Sort bed file
+# Sort bed file and make 100bp regions around peak center
 sort -k1,1 -k2,2n ${output}_intersect_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}' OFS="\t" > ./homer/${output}.sorted.bed
-
-
 
 # Now run homer to find enriched motifs
 findMotifsGenome.pl ./homer/${output}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
 
+
 echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
 # Add annotated peaks to merged bed files with python script
 
-
-
+# Activate conda environment
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 module use $HOME/MyModules/miniconda3
 module load miniconda3/latest
 conda deactivate
 conda activate chipseq
 
-# Launch python script with appropriate command line options (will be parsed from within the script)
+# If gene annotations were not previously added to the input bed files - add them to the intersected bed file here
 annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
 
 echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
@@ -213,14 +211,15 @@ echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
 # Make deeptools tornado plot of coverage of both replicates at intersected peaks
 computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 ---missingDataAsZero --skipZeros -o ${output}.matrix.gz 
 # Plot heatmap 
-plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r 
+plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r --legendLocation none --regionsLabel Peaks 
 
 rm ${output}.matrix.gz
 
+# Deactivate conda environment
 conda activate base
 
 num_peaks=$(wc -l ${output}_intersect.bed) 
-echo -e "---------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n---------------------------------------" >> combinereps_summary.out
+echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n----------------------------------------" >> combinereps_summary.out
 
 
 

@@ -78,8 +78,8 @@ cond2_diff <- out_results %>%
   filter(FDR < fdr & Fold > 0)
 
 # Write differential peaks to file
-file1 <- paste(cond1,'_enriched.bed',sep='')
-file2 <- paste(cond2,'_enriched.bed',sep='')
+file1 <- paste(cond1,'_c1_enriched.bed',sep='')
+file2 <- paste(cond2,'_c2_enriched.bed',sep='')
 write.table(cond1_diff, file=file1, sep="\t", quote=F, row.names=F, col.names=F)
 write.table(cond2_diff, file=file2, sep="\t", quote=F, row.names=F, col.names=F)
 
