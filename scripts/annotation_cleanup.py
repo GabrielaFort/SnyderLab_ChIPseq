@@ -40,7 +40,7 @@ if args.bed_file:
   annotate_df = pd.read_csv(annotate_file, sep="\t", header=0, names=["id","chrom","starting","ending","strnd","scre","size","annotation","det_anno","DistoTSS","promoter","Entrez","Unigene","Refseq","Ensembl","gene_name","Alias","Description","Type"])
   bed_df = pd.read_csv(bed_file, sep="\t", header=0, names=["chr","start","end","id","score","strand","signal","pval","qval","peak"])
   merge=bed_df.merge(annotate_df, how='outer', on='id')
-  new=merge[["chr","start","end","id","score","strand","signal","pval","qval","peak","gene_name"]]
+  new=merge[["chr","start","end","id","score","strand","signal","pval","qval","peak","gene_name","Ensembl","Description"]]
   # The start, end, and score columns have been converted into floats by pandas
   # Need to change back to ints
   new=new.fillna(0)
@@ -56,13 +56,13 @@ elif args.diffbind_bed_file:
   merge=bed_df.merge(annotate_df, how='outer', on=["chr","start"])
   
   
-  new=merge[["chr","start","end","width","strand","Conc","Conc_c2","Conc_c1","Fold","p_value","FDR","gene_name"]]
+  new=merge[["chr","start","end","width","strand","Conc","Conc_c2","Conc_c1","Fold","p_value","FDR","gene_name","Ensembl","Description"]]
   new=new.fillna(0)
   new=new.astype({"start":'int',"end":'int',"width":'int'})
 
 
 # save as tab separated bed file
-new.to_csv(bed_file, sep='\t',index=False,header=False)
+new.to_csv('peaks_and_annotations.bed', sep='\t',index=False,header=True)
 
 
 
