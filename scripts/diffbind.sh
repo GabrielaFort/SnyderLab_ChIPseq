@@ -119,11 +119,11 @@ module load R/4.1.3
 
 echo "Running diffbind R script"
 # Run the R script in batch, redirecting the job output to a file
-diffbind.R $diff_file $FDR > diffbind_summary.out
+diffbind.R $diff_file $FDR >> diffbind_summary.out
 
 
 # Annotate output files
-echo "Annotating peaks"
+echo -e "\nAnnotating diffbind output peaks...\n" >> diffbind_summary.out
 
 # First for DEseq2 output files with all peaks 
 annotatePeaks.pl diffbind_results.bed $genome > diffbind_annotate.txt
@@ -139,7 +139,7 @@ annotatePeaks.pl $cond2_bed $genome -go ./GO_${cond2_name} -annStats ${cond2_nam
 
 
 # Run homer
-echo "Running homer on differential peaks"
+echo -e "Running homer on differential peaks..." >> diffbind_summary.out
 
 sort -k1,1 -k2,2n $cond1_bed | uniq > ./${cond1_bed}_c1_enriched.sorted.bed
 findMotifsGenome.pl ./${cond1_bed}_c1_enriched.sorted.bed $genome ./${cond1_name}_homer -size given -mask -preparse
@@ -148,7 +148,7 @@ sort -k1,1 -k2,2n $cond2_bed | uniq > ./${cond2_bed}_c2_enriched.sorted.bed
 findMotifsGenome.pl ./${cond2_bed}_c2_enriched.sorted.bed $genome ./${cond2_name}_homer -size given -mask -preparse
 
 
-
+echo -e "Combining annotations with bed files..." >> diffbind_summary.out
 # Make graphs and run python script to annotate all bed files...
 # I want to annotate three bed files - the one with all of the results, and those enriched in each condition
 # Activate conda environment
@@ -164,7 +164,7 @@ annotation_cleanup.py -d ${cond2_bed}_c1_enriched.sorted.bed -a ${cond2_name}_an
 
 
 # Now use deeptools to make some heatmaps
-
+# Need to extract bed files from each and merge them all together 
 # First, I want coverage over
 
 # Next I want to merge
