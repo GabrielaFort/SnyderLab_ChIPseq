@@ -4,6 +4,7 @@
 #SBATCH --partition=kingspeak
 
 # loading modules
+echo $MODULEPATH
 module load bedtools
 # must have homer installed and in path as well! 
 
@@ -161,10 +162,10 @@ size_r2=$(wc -l <../"${bed_r2}")
 
 if [ ${size_r1} -ge ${size_r2} ]
 then
-  bedtools intersect -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
+  intersectBed -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
 elif [ ${size_r2} -ge ${size_r1} ]
 then
-  bedtools intersect -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
+  intersectBed -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
 fi
 
 # Create summit.bed file from intersected bed file
@@ -209,9 +210,9 @@ annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotati
 echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
 
 # Make deeptools tornado plot of coverage of both replicates at intersected peaks
-computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 ---missingDataAsZero --skipZeros -o ${output}.matrix.gz 
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S $bw_r1 $bw_r2 --missingDataAsZero --skipZeros -o ${output}.matrix.gz 
 # Plot heatmap 
-plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r --legendLocation none --regionsLabel Peaks 
+plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r --legendLocation none --regionsLabel Peaks --heatmapHeight 15 
 
 rm ${output}.matrix.gz
 
