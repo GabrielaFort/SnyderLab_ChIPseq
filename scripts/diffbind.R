@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript --vanilla
+#!/usr/bin/env Rscript
 
 
 ### DiffBind
@@ -10,7 +10,7 @@
 
 # Install necessary packages
 package_list <- c("DiffBind","tidyverse","BiocParallel","devtools")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+new.packages <- package_list[!(package_list %in% installed.packages()[,"Package"])]
 if(length(new.packages)) {
   install.packages(new.packages)
 }

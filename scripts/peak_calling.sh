@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -t 6:00:00 -N 1 -n 16
+#SBATCH -t 4:00:00 -N 1 -n 16
 #SBATCH --account=snydere
 #SBATCH --partition=kingspeak
 
@@ -215,7 +215,7 @@ rm ${name}.matrix.gz
 
 conda activate base
 
-num_peaks=$(wc -l ${name}_peaks.narrowPeak)
+num_peaks=$(wc -l <${name}_peaks.narrowPeak)
 echo -e "*****Summary******" >> peakcalling_summary.out
 echo -e "Number of called peaks: $num_peaks \n" >> peakcalling_summary.out
 echo -e "Job finished at `date`" >> peakcalling_summary.out

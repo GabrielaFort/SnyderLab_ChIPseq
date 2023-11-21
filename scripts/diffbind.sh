@@ -4,12 +4,6 @@
 #SBATCH --partition=kingspeak
 
 
-# Format input arguments - argument 1 is the diffbind file arg 2 is the fdr cutoff
-### arg 1 is diffbind csv file
-### arg 2 is FDR cutoff 
-### arg 3 is name of output directory
-### arg 4 is genome
-
 # Usage function to describe/document script
 usage_info()
 {
@@ -110,8 +104,9 @@ fi
 # Make directory with input name and navigate into it
 mkdir $output
 cd $output
+mv ../${diff_file} .
 
-echo -e "--------------------------------\nStarting Diffbind Analysis for ${diff_file}\nStarted at: `date`"------------------------------------ > diffbind_summary.out
+echo -e "--------------------------------\nStarting Diffbind Analysis for ${diff_file}\nStarted at: `date`\n------------------------------------" > diffbind_summary.out
 
 
 # Load R (version 4.1.3)
