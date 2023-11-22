@@ -106,8 +106,8 @@ will run HOMER on differential peaks, and will create many plots demonstrating s
 {-h|--help}                           -- Prints this help message and exits
 ```
 This script uses the [diffbind R package](https://bioconductor.org/packages/release/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf) to identify differential peaks across two conditions with biological replicates. This script takes as input a diffbind-formatted csv file (example below), a genome that the samples are aligned to, and a name for an output directory. It will perform differential analysis using DEseq2 and edgeR and will export bed files and annotated bed files containing differential peaks in each condition (based on FDR cutoff), will perform HOMER analysis on sets of differential peaks, and will generate a number of plots illustrating differences between the two conditions.
-```
+
 **Note:** The input diffbind csv file must match the formatting of the following example:
 
-![image](https://github.com/GabrielaFort/SnyderLab_ChIPseq/tree/main/images/diffbind_file.png)
+![](https://github.com/GabrielaFort/SnyderLab_ChIPseq/tree/main/images/diffbind_file.png)
 
