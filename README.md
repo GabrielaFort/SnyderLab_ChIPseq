@@ -109,5 +109,5 @@ This script uses the [diffbind R package](https://bioconductor.org/packages/rele
 ```
 **Note:** The input diffbind csv file must match the formatting of the following example:
 
-![Diffbind Input](
+![Diffbind Input](https://github.com/GabrielaFort/SnyderLab_ChIPseq/tree/main/images/diffbind_file.png)
 
