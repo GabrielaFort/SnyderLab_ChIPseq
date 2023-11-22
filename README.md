@@ -90,6 +90,24 @@ create tornado plots of the two replicates side by side.
 This script uses [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html) to identify overlapping peaks across two biological ChIP-seq replicates. It requires the path to the directory that is output from the Macs2 peak calling script for each biological replicate. It will return a new bed file (containing annotated gene names) of only intersected peaks, a merged bw file, tornado plots, and will run HOMER motif enrichment analysis on overlapping peaks and GO analysis on overlapping annotated genes.
 **Note:** In order for this script to work - do not change the names of the output directories or files from step 2: ```peak_calling.sh```!  
 
+## Differential Binding Analysis
+### ```diffbind.sh```
+```
+Usage:  [{-d|--diffbind} Diffbind Input File] [{-f|--FDR} Optional:FDR Cutoff] [{-o|--output} name] [{-g|--genome} genome]
+
+This bash script will take an input Diffbind-formatted file, an optional FDR cutoff for differential peak calling,
+a reference genome, and an output directory name. It will perform Diffbind analysis and return bed files of the output and differential peaks,
+will run HOMER on differential peaks, and will create many plots demonstrating sample comparisons.
+
+{-d|--diffbind} Diffbind_input        -- Diffbind-formatted input file
+{-g|--genome} genome                  -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)
+{-o|--output} name                    -- Set name of output directory
+{-f|--FDR} FDR cutoff                 -- Optional: Set FDR cutoff for differential peaks (Default=0.05)
+{-h|--help}                           -- Prints this help message and exits
+```
+This script uses the [diffbind R package](https://bioconductor.org/packages/release/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf) to identify differential peaks across two conditions with biological replicates. This script takes as input a diffbind-formatted csv file (example below), a genome that the samples are aligned to, and a name for an output directory. It will perform differential analysis using DEseq2 and edgeR and will export bed files and annotated bed files containing differential peaks in each condition (based on FDR cutoff), will perform HOMER analysis on sets of differential peaks, and will generate a number of plots illustrating differences between the two conditions.
+```
+**Note:** The input diffbind csv file must match the formatting of the following example:
 
 
 
