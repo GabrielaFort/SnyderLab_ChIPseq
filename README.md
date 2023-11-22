@@ -111,4 +111,11 @@ This script uses the [diffbind R package](https://bioconductor.org/packages/rele
 
 ![diffbind_file](images/diffbind_file.png)
 
+
 You must designate **absolute paths** to the bam and bed files, and you must have the same columns and order of columns in the input csv file.
+
+
+
+
+
+
