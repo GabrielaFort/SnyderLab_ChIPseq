@@ -43,19 +43,13 @@ cond2 <- (unique(sample$Condition))[2]
 
 # Perform diffbind steps according to tutorial
 dbobj<-dba(sampleSheet=sample)
-
 dbobj<-dba.count(dbobj, bUseSummarizeOverlaps=TRUE, bRemoveDuplicates=FALSE)
-
 dbobj<-dba.normalize(dbobj)
-
 dbobj<-dba.contrast(dbobj, categories=DBA_CONDITION, minMembers = 2)
-
 dbobj<-dba.analyze(dbobj, method=DBA_ALL_METHODS)
 
 # Gives little summary
 dba.show(dbobj, bContrasts = TRUE)
-
-dba.report(dbobj)
 
 ###Extract results from both methods: DEseq and EDGER
 db_results <- dba.report(dbobj, method=DBA_ALL_METHODS, contrast = 1, th=1)

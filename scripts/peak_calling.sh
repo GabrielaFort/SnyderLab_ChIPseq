@@ -87,25 +87,6 @@ flags()
 flags "$@"
 
 
-# Make sure user inputs correct genome option
-if [[ ! $genome =~ ^(mm10|mm39|hg19|hg38)$ ]] #use regular expressions to find either pattern
-then 
-  echo "Genome must be mm10, mm39, hg19, or hg38."
-  exit 1
-fi
-
-
-# Make sure input files exist
-if [ ! -f $chip ]
-then
-  echo "Cannot find experimental bam file"
-  exit 1
-elif [ ! -f $control ]
-then
-  echo "Cannot find control bam file"
-  exit 1
-fi
-
 # Make sure all input arguments have been assigned to variables
 if [ ! -v chip ]
 then
@@ -126,6 +107,26 @@ then
 elif [ ! -v qvalue ]
 then
   qvalue="0.01"
+fi
+
+
+# Make sure user inputs correct genome option
+if [[ ! $genome =~ ^(mm10|mm39|hg19|hg38)$ ]] #use regular expressions to find either pattern
+then 
+  echo "Genome must be mm10, mm39, hg19, or hg38."
+  exit 1
+fi
+
+
+# Make sure input files exist
+if [ ! -f $chip ]
+then
+  echo "Cannot find experimental bam file"
+  exit 1
+elif [ ! -f $control ]
+then
+  echo "Cannot find control bam file"
+  exit 1
 fi
 
 
@@ -197,7 +198,6 @@ echo -e "Updating bed file to include peak annotations...\n" >> peakcalling_summ
 # Activate conda environment
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
 module use $HOME/MyModules/miniconda3
-module load miniconda3/latest
 conda deactivate
 conda activate chipseq
 

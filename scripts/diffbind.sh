@@ -106,25 +106,25 @@ mkdir $output
 cd $output
 mv ../${diff_file} .
 
-echo -e "--------------------------------\nStarting Diffbind Analysis for ${diff_file}\nStarted at: `date`\n------------------------------------" > diffbind_summary.out
+echo -e "-----------------------------------\nStarting Diffbind Analysis for ${diff_file}\nStarted at: `date`\n------------------------------------" > diffbind_summary.out
 
 
 # Load R (version 4.1.3)
 module load R/4.1.3
 
-echo "Running diffbind R script"
+echo -e "\nRunning diffbind R script...\n" >> diffbind_summary.out
 # Run the R script in batch, redirecting the job output to a file
 diffbind.R $diff_file $FDR >> diffbind_summary.out
 
 
 # Annotate output files
-echo -e "\nAnnotating diffbind output peaks...\n" >> diffbind_summary.out
+echo -e "Annotating diffbind output peaks...\n" >> diffbind_summary.out
 
 # First for DEseq2 output files with all peaks 
 annotatePeaks.pl diffbind_results.bed $genome > diffbind_annotate.txt
 
-cond1_bed=$(*_c1_enriched.bed)
-cond2_bed=$(*_c2_enriched.bed)
+cond1_bed=$(echo *_c1_enriched.bed)
+cond2_bed=$(echo *_c2_enriched.bed)
 cond1_name=$(basename $cond1_bed _c1_enriched.bed)
 cond2_name=$(basename $cond2_bed _c2_enriched.bed)
 
@@ -134,41 +134,35 @@ annotatePeaks.pl $cond2_bed $genome -go ./GO_${cond2_name} -annStats ${cond2_nam
 
 
 # Run homer
-echo -e "Running homer on differential peaks..." >> diffbind_summary.out
+echo -e "Running homer on differential peaks...\n" >> diffbind_summary.out
 
-sort -k1,1 -k2,2n $cond1_bed | uniq > ./${cond1_bed}_c1_enriched.sorted.bed
-findMotifsGenome.pl ./${cond1_bed}_c1_enriched.sorted.bed $genome ./${cond1_name}_homer -size given -mask -preparse
+sort -k1,1 -k2,2n $cond1_bed | uniq > ./${cond1_name}_c1_enriched.sorted.bed
+findMotifsGenome.pl ./${cond1_name}_c1_enriched.sorted.bed $genome ./${cond1_name}_homer -size given -mask -preparse
 
-sort -k1,1 -k2,2n $cond2_bed | uniq > ./${cond2_bed}_c2_enriched.sorted.bed
-findMotifsGenome.pl ./${cond2_bed}_c2_enriched.sorted.bed $genome ./${cond2_name}_homer -size given -mask -preparse
+sort -k1,1 -k2,2n $cond2_bed | uniq > ./${cond2_name}_c2_enriched.sorted.bed
+findMotifsGenome.pl ./${cond2_name}_c2_enriched.sorted.bed $genome ./${cond2_name}_homer -size given -mask -preparse
 
 
-echo -e "Combining annotations with bed files..." >> diffbind_summary.out
+echo -e "Combining annotations with bed files...\n" >> diffbind_summary.out
 # Make graphs and run python script to annotate all bed files...
 # I want to annotate three bed files - the one with all of the results, and those enriched in each condition
 # Activate conda environment
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh 
 module use $HOME/MyModules/miniconda3
-module load miniconda3/latest
 conda deactivate
 conda activate chipseq
 
 annotation_cleanup.py -d diffbind_results.bed -a diffbind_annotate.txt -g $genome
-annotation_cleanup.py -d ${cond1_bed}_c1_enriched.sorted.bed -a ${cond1_name}_annotate.txt -g $genome
-annotation_cleanup.py -d ${cond2_bed}_c1_enriched.sorted.bed -a ${cond2_name}_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond1_bed} -a ${cond1_name}_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond2_bed} -a ${cond2_name}_annotate.txt -g $genome
 
+conda activate base
 
-# Now use deeptools to make some heatmaps
-# Need to extract bed files from each and merge them all together 
-# First, I want coverage over
+rm ${cond1_name}_c1_enriched.sorted.bed ${cond2_name}_c2_enriched.sorted.bed 
 
-# Next I want to merge
+echo -e "-----------------------------------\nFinished Diffbind Analysis for ${diff_file}\nFinished at: `date`\n------------------------------------" >> diffbind_summary.out
+num_peaks_c1=$(wc -l <${cond1_bed})
+num_peaks_c2=$(wc -l <${cond2_bed})
 
-
-
-
-
-
-
-
-rm ${cond1_bed}_c1_enriched.sorted.bed ${cond2_bed}_c1_enriched.sorted.bed
+echo -e "\nPeaks enriched in ${cond1_name} at an FDR of ${FDR}: ${num_peaks_c1}\n" >> diffbind_summary.out
+echo -e "Peaks enriched in ${cond2_name} at an FDR of ${FDR}: ${num_peaks_c2}\n" >> diffbind_summary.out

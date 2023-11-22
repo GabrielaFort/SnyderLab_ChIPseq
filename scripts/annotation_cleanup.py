@@ -62,7 +62,7 @@ elif args.diffbind_bed_file:
 
 
 # save as tab separated bed file
-new.to_csv(f'annotated_{annotate_file}', sep='\t',index=False,header=True)
+new.to_csv(f'annotated_{bed_file}', sep='\t',index=False,header=True)
 
 
 
