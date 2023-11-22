@@ -74,14 +74,6 @@ flags()
 flags "$@"
 
 
-# Make sure user inputs correct genome option
-if [[ ! $genome =~ ^(mm10|mm39|hg19|hg38)$ ]] #use regular expressions to find either pattern
-then 
-  echo "Genome must be mm10, mm39, hg19, or hg38."
-  exit 1
-fi
-
-
 # Make sure all input arguments have been assigned to variables
 if [ ! -v diff_file ]
 then
@@ -99,6 +91,30 @@ then
   echo '-o|--output is a required argument'
   exit 1
 fi
+
+
+# Make sure user inputs correct genome option
+if [[ ! $genome =~ ^(mm10|mm39|hg19|hg38)$ ]] #use regular expressions to find either pattern
+then 
+  echo "Genome must be mm10, mm39, hg19, or hg38."
+  exit 1
+fi
+
+
+# Make sure diffbind file exists
+if [ ! -f $diff_file ]
+then
+  echo "Cannot find diffbind input file!"
+  exit 1
+fi
+
+
+# Make sure file is a csv file
+if [[ ! $diff_file == *.csv ]]
+then
+  echo "Input file must be a csv file!"
+  exit 1
+fi 
 
 
 # Make directory with input name and navigate into it
