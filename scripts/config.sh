@@ -12,6 +12,6 @@ cp /uufs/chpc.utah.edu/sys/installdir/python/modules/miniconda3/latest.lua $HOME
 module use $HOME/MyModules
 source $HOME/software/pkg/miniconda3/etc/profile.d/conda.sh
 
-conda env create --file ../files/GFchipseq.yaml --name chipseq
+conda env create --file ../files/chipseq.yaml --name chipseq
 
 conda init
