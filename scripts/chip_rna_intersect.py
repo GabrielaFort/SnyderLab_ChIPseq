@@ -17,7 +17,7 @@ parser.add_argument("-r", required = True, help='Input differential gene express
 
 parser.add_argument("-b", required = True, help='Supply input ChIP seq bed file', dest = 'bed_file')
 
-parser.add_argument("-g", required = True, help='Supply genome that samples are aligned to', dest = 'genome')
+parser.add_argument("-g", required = True, help='Supply genome that samples are aligned to (options: mm10, mm39, hg19, hg38', dest = 'genome')
 
 parser.add_argument("-f", required = False, help='Optional: supply log2fc cutoff for differentially expressed gene list. Default: 0.585', dest = 'log2fc')
 
@@ -98,7 +98,7 @@ def set_intersection(set_list, anno_chip):
   # The function will return a list of sets where list[0] is upregulated bound genes and list[1] is
   # downregulated bound genes
   chip_df = pd.read_csv(anno_chip, sep='\t', header = 0)
-  peak_set = set(chip_df[15])
+  peak_set = set(chip_df['Gene Name'])
   
   intersect_list = []
   
@@ -172,4 +172,6 @@ x_list = ['Up Genes','Down Genes']
 bar_graph(x_list, y_list)
 
 
+os.remove('new_deg_file.tsv')
+os.remove('annotated_bound_genes.txt')
 
