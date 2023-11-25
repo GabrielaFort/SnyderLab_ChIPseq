@@ -4,7 +4,6 @@
 #SBATCH --partition=kingspeak
 
 # loading modules
-echo $MODULEPATH
 module load bedtools
 # must have homer installed and in path as well! 
 
@@ -53,12 +52,12 @@ flags()
         case "$1" in
         (-a|--rep1)
             shift
-            [ $# = 0 ] && error "No R1 bed file specified"
+            [ $# = 0 ] && error "No R1 directory specified"
             export r1_path=$(echo "$1" | sed 's:/*$::')
             shift;;
         (-b|--rep2)
             shift
-            [ $# = 0 ] && error "No R2 bed file specified"
+            [ $# = 0 ] && error "No R2 directory specified"
             export r2_path=$(echo "$1" | sed 's:/*$::')
             shift;;
         (-g|--genome)
