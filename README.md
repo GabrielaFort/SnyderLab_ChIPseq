@@ -112,8 +112,34 @@ This script uses the [diffbind R package](https://bioconductor.org/packages/rele
 
 You must designate **absolute paths** to the bam and bed files, and you must have the same columns and order of columns in the input csv file.
 
+## Generating Plots
+### ```deeptools_heatmaps.sh```
+```
+Usage: deeptools_heatmaps.sh [{-B|--bed1} condition 1 bed] [{-b|--bed2} condition 2 bed] [{-g|--genome} genome] [{-Ca|--coverage1a} condition 1 rep1 bw] [{-Cb|--coverage1b} condition 1 rep2 bw] [{-ca|--coverage2a} condition 2 rep1 bw] [-cb|--coverage2b} condition 2 rep2 bw]
 
+This bash script will take two input bed files (i.e. from two different conditions)
+and four bigwig files (i.e. from two replicates of two conditions).
+It will return heatmaps of coverage (both individual reps and merged) over the input bed files,
+individually and merged, and will perform k-means clustering and output bed files associated with the clusters.
 
+{-B|--bed1} Bed 1                  -- Condition 1 bed file
+{-b|--bed2} Bed 2                  -- Condition 2 bed file
+{-g|--genome} genome               -- Input genome that files are aligned to (mm10, mm39, hg19, hg38)
+{-Ca|--coverage1a} bw 1 rep1       -- Condition 1 Replicate 1 bigwig file
+{-Cb|--coverage1b} bw 1 rep2       -- Condition 1 Replicate 2 bigwig file
+{-ca|--coverage2a} bw 2 rep1       -- Condition 2 Replicate 1 bigwig file
+{-cb|--coverage2b} bw 2 rep2       -- Condition 2 Replicate 2 bigwig file
+{-h|--help}                        -- Prints this help message and exits
+```
+This script utilizes [deepTools](https://deeptools.readthedocs.io/en/develop/) to generate heatmaps and coverage plots of signal across
+sets of input peaks. It is designed to compare two conditions and takes as input two bed files (i.e. could represent differential peaks
+determined by diffbind) and four bigwig coverage files (two biological replicates from two conditions). It will generate many different 
+plots including signal over each individual bed file in both conditions, with the replicates either shown separately or merged together,
+as well as plots in which the bed files have been combined into one set of peaks. 
+
+Shown below are example output plots from this script showing ChIP-seq signal at sets of differential peaks determined by DiffBind:
+<img src='./images/biorender_workflow.png' width='700' height='300'/> 
+<img src='./images/biorender_workflow.png' width='700' height='300'/> 
 
 
 
