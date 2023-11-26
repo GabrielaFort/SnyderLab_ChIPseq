@@ -138,8 +138,9 @@ plots including signal over each individual bed file in both conditions, with th
 as well as plots in which the bed files have been combined into one set of peaks. 
 
 Shown below are example output plots from this script showing ChIP-seq signal at sets of differential peaks determined by DiffBind:
+Merged Replicates                           Individual Replicates
 
-<img src='./images/deeptools_diffbind_combined.png' width='300' height='500'/>  <img src='./images/deeptools_diffbind_reps.png' width='300' height='500'/> 
+<img src='./images/deeptools_diffbind_combined.png' width='300' height='500'/>  <img src='./images/deeptools_diffbind_reps.png' width='500' height='500'/> 
 
 
 
