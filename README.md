@@ -164,10 +164,17 @@ optional arguments:
   -f LOG2FC       Optional: supply log2fc cutoff for differentially expressed gene list. Default: 0.585
   -p PVAL         Optional: supply p value cutoff for differentially expressed gene list. Default: 0.05
 ```
+This is a script for comparison of RNAseq and ChIPseq data. A bed file must be entered with called ChIP-seq peaks
+as well as an RNAseq file containing differential expression data. This file can be a csv, tsv or excel file 
+but must have the following three columns : gene name, fold change (log2) and p value. If desired, the user
+can designate custom pval and log2fc cutoffs for downstream analysis. Otherwise, reasonable default values will 
+be utilized.
 
+This script will annotate called peaks using the HOMER suite's [annotation tool](http://homer.ucsd.edu/homer/ngs/annotation.html) and will 
+output many files and graphs representing overlap and intersections between significant differentially
+expressed genes (either up or downregulated) and called ChIP-seq peaks.
 
-
-Note: this script should be run directly rather than submitting it as a job at CHPC. To run the script, first 
+**Note:** This script should be run directly rather than submitting it as a job at CHPC. To run the script, first 
 activate the chipseq conda environment by running the following three lines of code:
 ```
 module use $HOME/MyModules
