@@ -169,10 +169,11 @@ optional arguments:
 
 Note: this script should be run directly rather than submitting it as a job at CHPC. To run the script, first 
 activate the chipseq conda environment by running the following three lines of code:
-
-```module use $HOME/MyModules```
-```conda deactivate```
-```conda activate chipseq```
+```
+module use $HOME/MyModules
+conda deactivate
+conda activate chipseq
+```
 
 
 
