@@ -172,7 +172,9 @@ be utilized.
 
 This script will annotate called peaks using the HOMER suite's [annotation tool](http://homer.ucsd.edu/homer/ngs/annotation.html) and will 
 output many files and graphs representing overlap and intersections between significant differentially
-expressed genes (either up or downregulated) and called ChIP-seq peaks.
+expressed genes (either up or downregulated) and called ChIP-seq peaks. Examples of output graphs are shown below:
+
+<img src='./images/venn_diagram.png' width='400' height='300'/>        <img src='./images/bar_graph.png' width='300' height='300'/>
 
 **Note:** This script should be run directly rather than submitting it as a job at CHPC. To run the script, first 
 activate the chipseq conda environment by running the following three lines of code:
