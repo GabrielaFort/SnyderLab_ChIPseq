@@ -138,9 +138,47 @@ plots including signal over each individual bed file in both conditions, with th
 as well as plots in which the bed files have been combined into one set of peaks. 
 
 Shown below are example output plots from this script showing ChIP-seq signal at sets of differential peaks determined by DiffBind:
-Merged Replicates                           Individual Replicates
+                          
 
-<img src='./images/deeptools_diffbind_combined.png' width='300' height='500'/>  <img src='./images/deeptools_diffbind_reps.png' width='500' height='500'/> 
+<img src='./images/deeptools_diffbind_combined.png' width='300' height='500'/>          <img src='./images/deeptools_diffbind_reps.png' width='500' height='500'/> 
+
+## Intersecting RNA-seq and ChIP-seq
+### ```chip_rna_intersect.py```
+```
+usage: chip_rna_intersect.py [-h] -r RNASEQ_FILE -b BED_FILE -g GENOME
+                             [-f LOG2FC] [-p PVAL]
+
+This is a python script for comparison of RNAseq and ChIPseq data.
+
+It takes a bed file from a ChIP-seq experiment with called ChIP-seq peaks and an RNAseq output file containing differential expression data.
+This file must contain three columns - gene ID, log2FC, and p value.
+If desired, the user may designate custom pval and log2fc cutoffs for downstream analysis. Otherwise, reasonable default values will be utilized.
+This script will annotate called peaks based on the distance to the nearest gene TSS using HOMER.
+It will then output many files and graphs representing overlap and intersections between significant differentially expressed genes (either up or downregulated) to called ChIP-seq peaks.
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -r RNASEQ_FILE  Input differential gene expression file. Required column format = gene_ID  Log2FC  p-value
+  -b BED_FILE     Supply input ChIP seq bed file
+  -g GENOME       Supply genome that samples are aligned to (options: mm10, mm39, hg19, hg38
+  -f LOG2FC       Optional: supply log2fc cutoff for differentially expressed gene list. Default: 0.585
+  -p PVAL         Optional: supply p value cutoff for differentially expressed gene list. Default: 0.05
+```
+
+
+
+Note: this script should be run directly rather than submitting it as a job at CHPC. To run the script, first 
+activate the chipseq conda environment by running the following three lines of code:
+
+```module use $HOME/MyModules```
+```conda deactivate```
+```conda activate chipseq```
+
+
+
+
+
+
 
 
 
