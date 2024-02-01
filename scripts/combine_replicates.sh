@@ -203,8 +203,24 @@ module use $HOME/MyModules/miniconda3
 conda deactivate
 conda activate chipseq
 
+echo -e "Running ChIP-R statistical replicate analysis...\n" >> combinereps_summary.out
+# Repeat the peak intersection using the statistical ChIP-R package - run homer, annotation, etc on statistically called peaks
+
+#Run chipr
+chipr -i ../${bed_r1} ../${bed_r2} -o ${output}_chipr
+
+#Annotate Peaks
+annotatePeaks.pl ${output}_chipr_optimal.bed $genome -go ./GO_chipr -annStats ${output}_chipr_annotation.log > ${output}_chipr_annotation.txt
+
+#Run homer
+mkdir homer_chipr
+
+sort -k1,1 -k2,2n ${output}_chipr_optimal.bed | uniq > ./homer_chipr/chipr_optimal.sorted.bed
+findMotifsGenome.pl ./homer_chipr/chipr_optimal.sorted.bed $genome ./homer_chipr -size 100 -mask -preparse -p 16
+
 # If gene annotations were not previously added to the input bed files - add them to the intersected bed file here
 annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
+annotation_cleanup.py -b ${output}_chipr_optimal.bed -a ${output}_chipr_annotation.txt -g $genome
 
 echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
 
@@ -218,8 +234,9 @@ rm ${output}.matrix.gz
 # Deactivate conda environment
 conda activate base
 
-num_peaks=$(wc -l <${output}_intersect.bed) 
-echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\n----------------------------------------" >> combinereps_summary.out
+num_peaks=$(wc -l <${output}_intersect.bed)
+chipr_peaks=$(wc -l <chipr/chipr_optimal.bed) 
+echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\nNumber of ChIP-R intersected peaks: $chipr_peaks----------------------------------------" >> combinereps_summary.out
 
 
 
