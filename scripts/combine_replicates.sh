@@ -235,8 +235,8 @@ rm ${output}.matrix.gz
 conda activate base
 
 num_peaks=$(wc -l <${output}_intersect.bed)
-chipr_peaks=$(wc -l <chipr/chipr_optimal.bed) 
-echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\nNumber of ChIP-R intersected peaks: $chipr_peaks----------------------------------------" >> combinereps_summary.out
+chipr_peaks=$(wc -l <${output}_chipr_optimal.bed) 
+echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\nNumber of ChIP-R intersected peaks: $chipr_peaks\n----------------------------------------" >> combinereps_summary.out
 
 
 
