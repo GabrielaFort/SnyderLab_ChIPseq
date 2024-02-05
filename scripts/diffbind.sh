@@ -137,27 +137,37 @@ diffbind.R $diff_file $FDR >> diffbind_summary.out
 echo -e "Annotating diffbind output peaks...\n" >> diffbind_summary.out
 
 # First for DEseq2 output files with all peaks 
-annotatePeaks.pl diffbind_results.bed $genome > diffbind_annotate.txt
+annotatePeaks.pl diffbind_deseq_results.bed $genome > diffbind_deseq_annotate.txt
+annotatePeaks.pl diffbind_edger_results.bed $genome > diffbind_edger_annotate.txt
 
-cond1_bed=$(echo *_c1_enriched.bed)
-cond2_bed=$(echo *_c2_enriched.bed)
-cond1_name=$(basename $cond1_bed _c1_enriched.bed)
-cond2_name=$(basename $cond2_bed _c2_enriched.bed)
+cond1_deseq_bed=$(echo *deseq_c1_enriched.bed)
+cond1_edger_bed=$(echo *edger_c1_enriched.bed)
+cond2_deseq_bed=$(echo *deseq_c2_enriched.bed)
+cond2_edger_bed=$(echo *edger_c2_enriched.bed)
+
+cond1_name=$(basename $cond1_deseq_bed deseq_c1_enriched.bed)
+cond2_name=$(basename $cond2_deseq_bed deseq_c2_enriched.bed)
 
 # Then run on each enriched .bed file - genome is $2 - second input arg
-annotatePeaks.pl $cond1_bed $genome -go ./GO_${cond1_name} -annStats ${cond1_name}_annotate.log > ${cond1_name}_annotate.txt
-annotatePeaks.pl $cond2_bed $genome -go ./GO_${cond2_name} -annStats ${cond2_name}_annotate.log > ${cond2_name}_annotate.txt
-
+annotatePeaks.pl $cond1_deseq_bed $genome -go ./GO_${cond1_name}_deseq -annStats ${cond1_name}_deseq_annotate.log > ${cond1_name}_deseq_annotate.txt
+annotatePeaks.pl $cond1_edger_bed $genome -go ./GO_${cond1_name}_edger -annStats ${cond1_name}_edger_annotate.log > ${cond1_name}_edger_annotate.txt
+annotatePeaks.pl $cond2_deseq_bed $genome -go ./GO_${cond2_name}_deseq -annStats ${cond2_name}_deseq_annotate.log > ${cond2_name}_deseq_annotate.txt
+annotatePeaks.pl $cond2_edger_bed $genome -go ./GO_${cond2_name}_edger -annStats ${cond2_name}_edger_annotate.log > ${cond2_name}_edger_annotate.txt
 
 # Run homer
 echo -e "Running homer on differential peaks...\n" >> diffbind_summary.out
 
-sort -k1,1 -k2,2n $cond1_bed | uniq > ./${cond1_name}_c1_enriched.sorted.bed
-findMotifsGenome.pl ./${cond1_name}_c1_enriched.sorted.bed $genome ./${cond1_name}_homer -size given -mask -preparse
+sort -k1,1 -k2,2n $cond1_deseq_bed | uniq > ./${cond1_name}_deseq_c1_enriched.sorted.bed
+findMotifsGenome.pl ./${cond1_name}_deseq_c1_enriched.sorted.bed $genome ./${cond1_name}_deseq_homer -size given -mask -preparse
 
-sort -k1,1 -k2,2n $cond2_bed | uniq > ./${cond2_name}_c2_enriched.sorted.bed
-findMotifsGenome.pl ./${cond2_name}_c2_enriched.sorted.bed $genome ./${cond2_name}_homer -size given -mask -preparse
+sort -k1,1 -k2,2n $cond1_edger_bed | uniq > ./${cond1_name}_edger_c1_enriched.sorted.bed
+findMotifsGenome.pl ./${cond1_name}_edger_c1_enriched.sorted.bed $genome ./${cond1_name}_edger_homer -size given -mask -preparse
 
+sort -k1,1 -k2,2n $cond2_deseq_bed | uniq > ./${cond2_name}_deseq_c2_enriched.sorted.bed
+findMotifsGenome.pl ./${cond2_name}_deseq_c2_enriched.sorted.bed $genome ./${cond2_name}_deseq_homer -size given -mask -preparse
+
+sort -k1,1 -k2,2n $cond2_edger_bed | uniq > ./${cond2_name}_edger_c2_enriched.sorted.bed
+findMotifsGenome.pl ./${cond2_name}_edger_c2_enriched.sorted.bed $genome ./${cond2_name}_edger_homer -size given -mask -preparse
 
 echo -e "Combining annotations with bed files...\n" >> diffbind_summary.out
 # Make graphs and run python script to annotate all bed files...
@@ -168,17 +178,22 @@ module use $HOME/MyModules/miniconda3
 conda deactivate
 conda activate chipseq
 
-annotation_cleanup.py -d diffbind_results.bed -a diffbind_annotate.txt -g $genome
-annotation_cleanup.py -d ${cond1_bed} -a ${cond1_name}_annotate.txt -g $genome
-annotation_cleanup.py -d ${cond2_bed} -a ${cond2_name}_annotate.txt -g $genome
+annotation_cleanup.py -d diffbind_deseq_results.bed -a diffbind_deseq_annotate.txt -g $genome
+annotation_cleanup.py -d diffbind_edger_results.bed -a diffbind_edger_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond1_deseq_bed} -a ${cond1_name}_deseq_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond1_edger_bed} -a ${cond1_name}_edger_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond2_deseq_bed} -a ${cond2_name}_deseq_annotate.txt -g $genome
+annotation_cleanup.py -d ${cond2_edger_bed} -a ${cond2_name}_edger_annotate.txt -g $genome
 
 conda activate base
 
-rm ${cond1_name}_c1_enriched.sorted.bed ${cond2_name}_c2_enriched.sorted.bed 
+rm ${cond1_name}_deseq_c1_enriched.sorted.bed ${cond2_name}_deseq_c2_enriched.sorted.bed ${cond1_name}_edger_c1_enriched.sorted.bed ${cond2_name}_edger_c2_enriched.sorted.bed
 
 echo -e "-----------------------------------\nFinished Diffbind Analysis for ${diff_file}\nFinished at: `date`\n------------------------------------" >> diffbind_summary.out
-num_peaks_c1=$(wc -l <${cond1_bed})
-num_peaks_c2=$(wc -l <${cond2_bed})
+num_peaks_c1_deseq=$(wc -l <${cond1_deseq_bed})
+num_peaks_c1_edger=$(wc -l <${cond1_edger_bed})
+num_peaks_c2_deseq=$(wc -l <${cond2_deseq_bed})
+num_peaks_c2_edger=$(wc -l <${cond2_edger_bed})
 
-echo -e "\nPeaks enriched in ${cond1_name} at an FDR of ${FDR}: ${num_peaks_c1}\n" >> diffbind_summary.out
-echo -e "Peaks enriched in ${cond2_name} at an FDR of ${FDR}: ${num_peaks_c2}\n" >> diffbind_summary.out
+echo -e "\nPeaks enriched in ${cond1_name} at an FDR of ${FDR}: DESEQ:${num_peaks_c1_deseq}, EDGER:${num_peaks_c1_edger}\n" >> diffbind_summary.out
+echo -e "Peaks enriched in ${cond2_name} at an FDR of ${FDR}: DESEQ:${num_peaks_c2_deseq}, EDGER:${num_peaks_c2_edger}\n" >> diffbind_summary.out
