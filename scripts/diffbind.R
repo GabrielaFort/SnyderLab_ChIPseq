@@ -52,30 +52,45 @@ dbobj<-dba.analyze(dbobj, method=DBA_ALL_METHODS)
 dba.show(dbobj, bContrasts = TRUE)
 
 ###Extract results from both methods: DEseq and EDGER
-db_results <- dba.report(dbobj, method=DBA_ALL_METHODS, contrast = 1, th=1)
+res_deseq <- dba.report(dbobj, method=DBA_DESEQ2, contrast = 1, th=1)
+res_edger <- dba.report(dbobj, method=DBA_EDGER, contrast = 1, th=1)
 
 # Write to file - bed file format
-out_results <- as.data.frame(db_results)
+out_deseq <- as.data.frame(res_deseq)
+out_edger <- as.data.frame(res_edger)
 
 # Write without column names to be compatible with bed file formatting - but include in documentation what each column is...
-write.table(out_results, file="./diffbind_results.bed", sep="\t", quote=F, row.names=F, col.names=F)
+write.table(out_deseq, file="./diffbind_deseq_results.bed", sep="\t", quote=F, row.names=F, col.names=F)
+write.table(out_edger, file="./diffbind_edger_results.bed", sep="\t", quote=F, row.names=F, col.names=F)
 
 # Write bed files
 # Create bed files for each condition keeping only significant peaks (according to user defined fdr)
 # in this case, condition 1 has a negative fold change and condition 2 has a positive fold change
 # where the condition you added first in your sheet is condition 1
 
-cond1_diff <- out_results %>%
+cond1_deseq <- out_deseq %>%
   filter(FDR < fdr & Fold < 0)
 
-cond2_diff <- out_results %>% 
+cond1_edger <- out_edger %>%
+  filter(FDR < fdr & Fold < 0)
+
+cond2_deseq <- out_deseq %>% 
   filter(FDR < fdr & Fold > 0)
 
+cond2_edger <- out_edger %>%  
+  filter(FDR < fdr & Fold > 0)
+
+
 # Write differential peaks to file
-file1 <- paste(cond1,'_c1_enriched.bed',sep='')
-file2 <- paste(cond2,'_c2_enriched.bed',sep='')
-write.table(cond1_diff, file=file1, sep="\t", quote=F, row.names=F, col.names=F)
-write.table(cond2_diff, file=file2, sep="\t", quote=F, row.names=F, col.names=F)
+file1_edger <- paste(cond1,'edger_c1_enriched.bed',sep='')
+file1_deseq <- paste(cond1,'deseq_c1_enriched.bed',sep='')
+file2_edger <- paste(cond2,'edger_c2_enriched.bed',sep='')
+file2_deseq <- paste(cond2,'deseq_c2_enriched.bed',sep='')
+
+write.table(cond1_deseq, file=file1_deseq, sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond1_edger, file=file1_edger, sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond2_deseq, file=file2_deseq, sep="\t", quote=F, row.names=F, col.names=F)
+write.table(cond2_edger, file=file2_edger, sep="\t", quote=F, row.names=F, col.names=F)
 
 
 ### Now exporting a bunch of potentially useful graphs ##
