@@ -82,10 +82,10 @@ cond2_edger <- out_edger %>%
 
 
 # Write differential peaks to file
-file1_edger <- paste(cond1,'edger_c1_enriched.bed',sep='')
-file1_deseq <- paste(cond1,'deseq_c1_enriched.bed',sep='')
-file2_edger <- paste(cond2,'edger_c2_enriched.bed',sep='')
-file2_deseq <- paste(cond2,'deseq_c2_enriched.bed',sep='')
+file1_edger <- paste(cond1,'_edger_c1_enriched.bed',sep='')
+file1_deseq <- paste(cond1,'_deseq_c1_enriched.bed',sep='')
+file2_edger <- paste(cond2,'_edger_c2_enriched.bed',sep='')
+file2_deseq <- paste(cond2,'_deseq_c2_enriched.bed',sep='')
 
 write.table(cond1_deseq, file=file1_deseq, sep="\t", quote=F, row.names=F, col.names=F)
 write.table(cond1_edger, file=file1_edger, sep="\t", quote=F, row.names=F, col.names=F)
