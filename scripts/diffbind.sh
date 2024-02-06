@@ -145,8 +145,8 @@ cond1_edger_bed=$(echo *edger_c1_enriched.bed)
 cond2_deseq_bed=$(echo *deseq_c2_enriched.bed)
 cond2_edger_bed=$(echo *edger_c2_enriched.bed)
 
-cond1_name=$(basename $cond1_deseq_bed deseq_c1_enriched.bed)
-cond2_name=$(basename $cond2_deseq_bed deseq_c2_enriched.bed)
+cond1_name=$(basename $cond1_deseq_bed _deseq_c1_enriched.bed)
+cond2_name=$(basename $cond2_deseq_bed _deseq_c2_enriched.bed)
 
 # Then run on each enriched .bed file - genome is $2 - second input arg
 annotatePeaks.pl $cond1_deseq_bed $genome -go ./GO_${cond1_name}_deseq -annStats ${cond1_name}_deseq_annotate.log > ${cond1_name}_deseq_annotate.txt
