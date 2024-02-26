@@ -123,12 +123,12 @@ fi
 # Find and assign files to variables
 base_r1=$(basename $r1_path)
 base_r2=$(basename $r2_path)
-bed_r1=$(echo ${r1_path}/${base_r1}_peaks.narrowPeak)
-bed_r2=$(echo ${r2_path}/${base_r2}_peaks.narrowPeak)
-bw_r1=$(echo ${r1_path}/${base_r1}_treat_pileup.bw)
-bw_r2=$(echo ${r2_path}/${base_r2}_treat_pileup.bw)
-summit_r1=$(echo ${r1_path}/${base_r1}_summits.bed)
-summit_r2=$(echo ${r2_path}/${base_r2}_summits.bed)
+bed_r1=$(echo ${r1_path#/}/${base_r1}_peaks.narrowPeak)
+bed_r2=$(echo ${r2_path#/}/${base_r2}_peaks.narrowPeak)
+bw_r1=$(echo ${r1_path#/}/${base_r1}_treat_pileup.bw)
+bw_r2=$(echo ${r2_path#/}/${base_r2}_treat_pileup.bw)
+summit_r1=$(echo ${r1_path#/}/${base_r1}_summits.bed)
+summit_r2=$(echo ${r2_path#/}/${base_r2}_summits.bed)
 
 
 # Assign chrom sizes files to variables based on input genome
