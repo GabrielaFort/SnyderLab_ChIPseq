@@ -123,12 +123,12 @@ fi
 # Find and assign files to variables
 base_r1=$(basename $r1_path)
 base_r2=$(basename $r2_path)
-bed_r1=$(echo ${r1_path#/}/${base_r1}_peaks.narrowPeak)
-bed_r2=$(echo ${r2_path#/}/${base_r2}_peaks.narrowPeak)
-bw_r1=$(echo ${r1_path#/}/${base_r1}_treat_pileup.bw)
-bw_r2=$(echo ${r2_path#/}/${base_r2}_treat_pileup.bw)
-summit_r1=$(echo ${r1_path#/}/${base_r1}_summits.bed)
-summit_r2=$(echo ${r2_path#/}/${base_r2}_summits.bed)
+bed_r1=$(echo ${r1_path}/${base_r1}_peaks.narrowPeak)
+bed_r2=$(echo ${r2_path}/${base_r2}_peaks.narrowPeak)
+bw_r1=$(echo ${r1_path}/${base_r1}_treat_pileup.bw)
+bw_r2=$(echo ${r2_path}/${base_r2}_treat_pileup.bw)
+summit_r1=$(echo ${r1_path}/${base_r1}_summits.bed)
+summit_r2=$(echo ${r2_path}/${base_r2}_summits.bed)
 
 
 # Assign chrom sizes files to variables based on input genome
@@ -149,52 +149,51 @@ fi
 
 # Make directory with input name and navigate into it
 mkdir $output
-cd $output
 
-echo -e "----------------------------------------\nStarting replicate peak intersection at `date`\n----------------------------------------" > combinereps_summary.out
+echo -e "----------------------------------------\nStarting replicate peak intersection at `date`\n----------------------------------------" > ${output}/combinereps_summary.out
 
 
-echo -e "Running bedtools intersect...\n" >> combinereps_summary.out
+echo -e "Running bedtools intersect...\n" >> ${output}/combinereps_summary.out
 
 # determine largest peak file and find overlaps with other peak file
-size_r1=$(wc -l <../"${bed_r1}")
-size_r2=$(wc -l <../"${bed_r2}")
+size_r1=$(wc -l <"${bed_r1}")
+size_r2=$(wc -l <"${bed_r2}")
 
 if [ ${size_r1} -ge ${size_r2} ]
 then
-  intersectBed -a ../${bed_r1} -b ../${bed_r2} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
+  intersectBed -a ${bed_r1} -b ${bed_r2} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}/${output}_intersect.bed
 elif [ ${size_r2} -ge ${size_r1} ]
 then
-  intersectBed -a ../${bed_r2} -b ../${bed_r1} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}_intersect.bed
+  intersectBed -a ${bed_r2} -b ${bed_r1} -wa | uniq | sort -k1,1 -k2,2n | uniq > ${output}/${output}_intersect.bed
 fi
 
 # Create summit.bed file from intersected bed file
-awk '{print $1,$2+$10,$2+$10+1,$4,$5}' OFS="\t" ${output}_intersect.bed > ${output}_intersect_summits.bed
+awk '{print $1,$2+$10,$2+$10+1,$4,$5}' OFS="\t" ${output}/${output}_intersect.bed > ${output}/${output}_intersect_summits.bed
 
 
 # create merged bw files
-echo -e "Creating merged bw files...\n" >> combinereps_summary.out
-bigWigMerge ../${bw_r1} ../${bw_r2} merged.bedGraph
-sort -k1,1 -k2,2n merged.bedGraph > sorted.merged.bedGraph
-bedGraphToBigWig sorted.merged.bedGraph $input_genome merged.bw
-rm sorted.merged.bedGraph
+echo -e "Creating merged bw files...\n" >> ${output}/combinereps_summary.out
+bigWigMerge ${bw_r1} ${bw_r2} ${output}/merged.bedGraph
+sort -k1,1 -k2,2n ${output}/merged.bedGraph > ${output}/sorted.merged.bedGraph
+bedGraphToBigWig ${output}/sorted.merged.bedGraph $input_genome ${output}/merged.bw
+rm ${output}/sorted.merged.bedGraph
 
-echo -e "Annotating peaks...\n" >> combinereps_summary.out
+echo -e "Annotating peaks...\n" >> ${output}/combinereps_summary.out
 # Annotate peaks
-annotatePeaks.pl ${output}_intersect.bed $genome -go ./GO_intersect -annStats ${output}_intersect_annotation.log > ${output}_intersect_annotation.txt
+annotatePeaks.pl ${output}/${output}_intersect.bed $genome -go ${output}/GO_intersect -annStats ${output}/${output}_intersect_annotation.log > ${output}/${output}_intersect_annotation.txt
 
-echo -e "Running homer...\n" >> combinereps_summary.out
+echo -e "Running homer...\n" >> ${output}/combinereps_summary.out
 # Run homer 
-mkdir homer
+mkdir ${output}/homer
 
 # Sort bed file and make 100bp regions around peak center
-sort -k1,1 -k2,2n ${output}_intersect_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}' OFS="\t" > ./homer/${output}.sorted.bed
+sort -k1,1 -k2,2n ${output}/${output}_intersect_summits.bed | uniq | awk '{print $1,$2-50,$3+49,$4,$5}' OFS="\t" > ${output}/homer/${output}.sorted.bed
 
 # Now run homer to find enriched motifs
-findMotifsGenome.pl ./homer/${output}.sorted.bed $genome ./homer -size 100 -mask -preparse -p 16
+findMotifsGenome.pl ${output}/homer/${output}.sorted.bed $genome ${output}/homer -size 100 -mask -preparse -p 16
 
 
-echo -e "Adding peak annotations to bed file...\n" >> combinereps_summary.out
+echo -e "Adding peak annotations to bed file...\n" >> ${output}/combinereps_summary.out
 # Add annotated peaks to merged bed files with python script
 
 # Activate conda environment
@@ -203,40 +202,40 @@ module use $HOME/MyModules/miniconda3
 conda deactivate
 conda activate chipseq
 
-echo -e "Running ChIP-R statistical replicate analysis...\n" >> combinereps_summary.out
+echo -e "Running ChIP-R statistical replicate analysis...\n" >> ${output}/combinereps_summary.out
 # Repeat the peak intersection using the statistical ChIP-R package - run homer, annotation, etc on statistically called peaks
 
 #Run chipr
-chipr -i ../${bed_r1} ../${bed_r2} -o ${output}_chipr
+chipr -i ${bed_r1} ${bed_r2} -o ${output}/${output}_chipr
 
 #Annotate Peaks
-annotatePeaks.pl ${output}_chipr_optimal.bed $genome -go ./GO_chipr -annStats ${output}_chipr_annotation.log > ${output}_chipr_annotation.txt
+annotatePeaks.pl ${output}/${output}_chipr_optimal.bed $genome -go ${output}/GO_chipr -annStats ${output}/${output}_chipr_annotation.log > ${output}/${output}_chipr_annotation.txt
 
 #Run homer
-mkdir homer_chipr
+mkdir ${output}/homer_chipr
 
-sort -k1,1 -k2,2n ${output}_chipr_optimal.bed | uniq > ./homer_chipr/chipr_optimal.sorted.bed
-findMotifsGenome.pl ./homer_chipr/chipr_optimal.sorted.bed $genome ./homer_chipr -size 100 -mask -preparse -p 16
+sort -k1,1 -k2,2n ${output}/${output}_chipr_optimal.bed | uniq > ${output}/homer_chipr/chipr_optimal.sorted.bed
+findMotifsGenome.pl ${output}/homer_chipr/chipr_optimal.sorted.bed $genome ${output}/homer_chipr -size 100 -mask -preparse -p 16
 
 # If gene annotations were not previously added to the input bed files - add them to the intersected bed file here
-annotation_cleanup.py -b ${output}_intersect.bed -a ${output}_intersect_annotation.txt -g $genome
-annotation_cleanup.py -b ${output}_chipr_optimal.bed -a ${output}_chipr_annotation.txt -g $genome
+annotation_cleanup.py -b ${output}/${output}_intersect.bed -a ${output}/${output}_intersect_annotation.txt -g $genome
+annotation_cleanup.py -b ${output}/${output}_chipr_optimal.bed -a ${output}/${output}_chipr_annotation.txt -g $genome
 
-echo -e "Making tornado plots of merged peaks...\n" >> combinereps_summary.out
+echo -e "Making tornado plots of merged peaks...\n" >> ${output}/combinereps_summary.out
 
 # Make deeptools tornado plot of coverage of both replicates at intersected peaks
-computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}_intersect.bed -S ../${bw_r1} ../${bw_r2} --missingDataAsZero --skipZeros -o ${output}.matrix.gz 
+computeMatrix reference-point --referencePoint center -b 1500 -a 1500 -R ${output}/${output}_intersect.bed -S ${bw_r1} ${bw_r2} --missingDataAsZero --skipZeros -o ${output}/${output}.matrix.gz 
 # Plot heatmap 
-plotHeatmap -m ${output}.matrix.gz -out ${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r --legendLocation none --regionsLabel Peaks --heatmapHeight 15 
+plotHeatmap -m ${output}/${output}.matrix.gz -out ${output}/${output}_reps_tornadoplot.pdf --colorMap RdYlBu_r --legendLocation none --regionsLabel Peaks --heatmapHeight 15 
 
-rm ${output}.matrix.gz
+rm ${output}/${output}.matrix.gz
 
 # Deactivate conda environment
 conda activate base
 
-num_peaks=$(wc -l <${output}_intersect.bed)
-chipr_peaks=$(wc -l <${output}_chipr_optimal.bed) 
-echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\nNumber of ChIP-R intersected peaks: $chipr_peaks\n----------------------------------------" >> combinereps_summary.out
+num_peaks=$(wc -l <${output}/${output}_intersect.bed)
+chipr_peaks=$(wc -l <${output}/${output}_chipr_optimal.bed) 
+echo -e "-----------------------------------------\nJob Finished at: `date`\nNumber of intersected peaks: $num_peaks\nNumber of ChIP-R intersected peaks: $chipr_peaks\n----------------------------------------" >> ${output}/combinereps_summary.out
 
 
 
