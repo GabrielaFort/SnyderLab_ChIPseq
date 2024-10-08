@@ -206,7 +206,7 @@ do
   | samtools fixmate -m - ${base}.bam
 
   samtools sort ${base}.bam -@ 32 -o ${base}.sorted.bam
-
+  samtools index ${base}.sorted.bam
 
   ###Using Tim's UMIscripts to discard duplicates using UMIs
   echo -e "\n------------Discarding duplicated with Tim's bam_umi_dedup.pl script for $filename-------------\n" >> alignment_summary.out
