@@ -34,6 +34,12 @@ register(SerialParam())
 args <- commandArgs(trailingOnly = TRUE)
 sampleSheet = args[1]
 fdr = args[2]
+genome = as.character(args[3])
+
+
+print(fdr)
+print(genome)
+
 
 sample<-read.csv(sampleSheet)
 
@@ -45,9 +51,18 @@ cond2 <- (unique(sample$Condition))[2]
 dbobj<-dba(sampleSheet=sample)
 dbobj<-dba.count(dbobj, bUseSummarizeOverlaps=TRUE, bRemoveDuplicates=FALSE)
 dbobj<-dba.normalize(dbobj)
-dbobj<-dba.contrast(dbobj, categories=DBA_CONDITION, minMembers = 2)
-dbobj<-dba.analyze(dbobj, method=DBA_ALL_METHODS)
+print("normalization step done")
+if(genome == "mm39") {
+  print("mm39")
+  mm39_blacklist <- readRDS("~/SnyderLab_ChIPseq/files/mm39.excluderanges.rds")
+  dba.blacklist(dbobj, blacklist=mm39_blacklist)
+  print("mm39 blacklist step done")
+}  
 
+dbobj<-dba.contrast(dbobj, categories=DBA_CONDITION, minMembers = 2)
+print("contrast step done")
+dbobj<-dba.analyze(dbobj, method=DBA_ALL_METHODS)
+print("analysis step done")
 # Gives little summary
 dba.show(dbobj, bContrasts = TRUE)
 
