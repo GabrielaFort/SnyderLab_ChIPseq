@@ -130,7 +130,7 @@ module load R/4.1.3
 
 echo -e "\nRunning diffbind R script...\n" >> diffbind_summary.out
 # Run the R script in batch, redirecting the job output to a file
-diffbind.R $diff_file $FDR >> diffbind_summary.out
+diffbind.R $diff_file $FDR $genome >> diffbind_summary.out
 
 
 # Annotate output files
