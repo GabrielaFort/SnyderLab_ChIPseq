@@ -1,5 +1,5 @@
 # SnyderLab_ChIPseq
-### Gabriela Fort and Katy Gillis
+### Gabriela Fort, Katy Gillis and Anna Waters
 
 ## Description
 A set of scripts and tools for analysis of ChIP-sequencing datasets. Includes useful scripts for alignment
