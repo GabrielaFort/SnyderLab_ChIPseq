@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -t 24:00:00 -N 1 -n 16
+#SBATCH -t 36:00:00 -N 1 -n 16
 #SBATCH --account=snydere
 #SBATCH --partition=kingspeak
 
