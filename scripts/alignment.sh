@@ -10,7 +10,7 @@
 module use /uufs/chpc.utah.edu/common/home/hcibcore/Modules/modulefiles
 module load umiscripts
 module load cutadapt
-
+module load fastqc
 
 ###### Parsing command line arguments ######
 arg0=$(basename "$0")
@@ -107,8 +107,9 @@ then
 fi 
 
 
-# Navigate into input directory
+# Navigate into input directory and create directory for FastQC results
 cd $directory
+mkdir fastqc_results
 
 echo "----------------------" > alignment_summary.out
 echo "Running alignment.sh" >> alignment_summary.out
@@ -180,8 +181,18 @@ do
   echo -e "\n\n----------------------------------------" >> alignment_summary.out
   echo "Starting alignment for $filename" >> alignment_summary.out
   echo -e "----------------------------------------\n\n" >> alignment_summary.out
-  echo -e "--------Appending SAM tags to fastq files with UMIs for sample $filename--------\n" >> alignment_summary.out
+  echo -e "--------Running FastQC for sample $filename----------\n" >> alignment_summary.out
+
+  gunzip $read_1 $read_2
   
+  unzip_read_1=$(basename $read_1 .gz)
+  unzip_read_2=$(basename $read_2 .gz)
+
+  fastqc -o fastqc_results $unzip_read_1 $unzip_read_2
+ 
+  gzip $unzip_read_1 $unzip_read_2 
+  
+  echo -e "--------Appending SAM tags to fastq files with UMIs for sample $filename--------\n" >> alignment_summary.out
 
   # Use Tim's UMI scripts to add SAM tags to fastq files with UMIs
   merge_umi_fastq.pl $read_1 $read_2 $UMI &>> alignment_summary.out
@@ -189,7 +200,6 @@ do
   UMIfastq_2=$(basename $read_2 .fastq.gz)
   base=$(basename $read_1 _R1.fastq.gz)
   rm $read_1 $read_2
-    
 
   ###Removing adapters from reads and quality trim
   echo -e "\n--------Running cutadapt on $filename to remove adaptors and quality trim reads--------\n" >> alignment_summary.out
