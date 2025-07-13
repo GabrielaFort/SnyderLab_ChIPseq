@@ -38,7 +38,7 @@ genome = args.genome
 if args.bed_file:
   bed_file = args.bed_file
   annotate_df = pd.read_csv(annotate_file, sep="\t", header=0, names=["id","chrom","starting","ending","strnd","scre","size","annotation","det_anno","DistoTSS","promoter","Entrez","Unigene","Refseq","Ensembl","gene_name","Alias","Description","Type"])
-  bed_df = pd.read_csv(bed_file, sep="\t", header=0, names=["chr","start","end","id","score","strand","signal","pval","qval","peak"])
+  bed_df = pd.read_csv(bed_file, sep="\t", header=None, names=["chr","start","end","id","score","strand","signal","pval","qval","peak"])
   merge=bed_df.merge(annotate_df, how='outer', on='id')
   new=merge[["chr","start","end","id","score","strand","signal","pval","qval","peak","gene_name","Ensembl","Description"]]
   # The start, end, and score columns have been converted into floats by pandas
@@ -51,7 +51,7 @@ elif args.diffbind_bed_file:
   annotate_df = pd.read_csv(annotate_file, sep="\t", header=0, names=["id","chr","start","ending","strnd","scre","size","annotation","det_anno","DistoTSS","promoter","Entrez","Unigene","Refseq","Ensembl","gene_name","Alias","Description","Type"])
   annotate_df["start"] = annotate_df["start"] - 1
 
-  bed_df = pd.read_csv(bed_file, sep="\t", header=0, names=["chr","start","end","width","strand","Conc","Conc_c2","Conc_c1","Fold","p_value","FDR"])
+  bed_df = pd.read_csv(bed_file, sep="\t", header=None, names=["chr","start","end","width","strand","Conc","Conc_c2","Conc_c1","Fold","p_value","FDR"])
   
   merge=bed_df.merge(annotate_df, how='outer', on=["chr","start"])
   
