@@ -45,7 +45,7 @@ Keep the same names as they are default exported from Gnomex!
 ```
 This script is meant to be compatible with file names exported from Gnomex. It will take a genome build and a directory containing 
 fastq files downloaded from Gnomex as input. It can handle samples from multiple experiments at once that have 'R1', 'R2', and 'R3'
-in their names to designate Read 1, UMI, Read 2 fastq files (default naming from Gnomex). For each sample, this script will run [FastQC] (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), trim sequencing adaptors using [Cutadapt](https://cutadapt.readthedocs.io/en/stable/), 
+in their names to designate Read 1, UMI, Read 2 fastq files (default naming from Gnomex). For each sample, this script will run [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), trim sequencing adaptors using [Cutadapt](https://cutadapt.readthedocs.io/en/stable/), 
 align reads to the designated reference genome using [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml), deduplicate reads based 
 on the provided UMI fastq files using Tim Parnell's [UMIScripts](https://github.com/HuntsmanCancerInstitute/UMIScripts/tree/master) tool, 
 convert sam to sorted bam files using [Samtools](http://www.htslib.org/), and will export summary files from alignment and deduplication.
